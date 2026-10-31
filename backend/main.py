@@ -14,11 +14,21 @@ from backend.models import Ingredient, Movement, Event, Alert
 from backend.schemas import (
     IngredientCreate, IngredientUpdate, IngredientOut,
     MovementOut, SaleCreate, StockChange,
-    EventOut, AlertOut, HealthResponse
+    EventOut, AlertOut, HealthResponse,
+    RestockItem, SummaryResponse
 )
 from backend import crud
 from backend.seed import seed_database
 from backend.data_cleaner import resolve_column, COLUMN_ALIASES, load_and_clean
+
+try:
+    from restock import (
+        days_until_stockout, safety_stock, reorder_quantity, status as stock_status, compute_restock_profile
+    )
+except ImportError:
+    from backend.restock import (
+        days_until_stockout, safety_stock, reorder_quantity, status as stock_status, compute_restock_profile
+    )
 
 # Create tables
 Base.metadata.create_all(bind=engine)
@@ -473,7 +483,114 @@ async def predict_demand_csv(file: UploadFile = File(...)):
 
 
 # ==============================================================================
-# 7. DEMO SEEDING
+# 7. RESTOCK & SUMMARY INTELLIGENCE
+# ==============================================================================
+DEFAULT_BURN_RATES = {
+    "Bat Wings": 8.0,
+    "Dragon Scale": 3.0,
+    "Eye Of Newt": 3.0,
+    "Ghost Pepper": 5.0,
+    "Mandrake Root": 6.0,
+    "Nightshade Essence": 2.5,
+    "Phoenix Feather": 1.0,
+    "Spider Silk": 4.0
+}
+
+def _build_restock_list(db: Session) -> List[dict]:
+    ingredients = db.query(Ingredient).order_by(Ingredient.name).all()
+    active_curse = db.query(Event).filter(Event.active == True).first()
+    curse_multiplier = active_curse.multiplier if active_curse else 1.0
+    cursed_names = {"Bat Wings", "Ghost Pepper", "Mandrake Root"}
+
+    items = []
+    for ing in ingredients:
+        # Check sales movements in the last 14 days
+        cutoff = datetime.utcnow() - timedelta(days=14)
+        sales = (
+            db.query(Movement)
+            .filter(Movement.ingredient_id == ing.id, Movement.type == "sale", Movement.ts >= cutoff)
+            .all()
+        )
+        if sales:
+            total_sold = sum(s.qty for s in sales)
+            distinct_days = len(set(s.ts.date() for s in sales))
+            daily_burn = total_sold / max(1, distinct_days)
+        else:
+            daily_burn = DEFAULT_BURN_RATES.get(ing.name.title(), max(1.0, round(ing.current_stock / 7.0, 1)))
+
+        # Apply active event multiplier
+        if active_curse and ing.name.title() in cursed_names:
+            daily_burn *= curse_multiplier
+
+        daily_burn = round(daily_burn, 2)
+        horizon = max(14, ing.lead_time_days + 7)
+        forecast_series = [daily_burn] * horizon
+
+        days_left = days_until_stockout(ing.current_stock, forecast_series)
+        st = stock_status(days_left)
+        sigma = max(0.5, round(0.25 * daily_burn, 2))
+        ss = safety_stock(sigma, ing.lead_time_days, z=1.65)
+        forecast_lead_review = daily_burn * (ing.lead_time_days + 7)
+        reorder = reorder_quantity(forecast_lead_review, ss, ing.current_stock)
+
+        items.append({
+            "ingredient_id": ing.id,
+            "ingredient": ing.name,
+            "stock": round(float(ing.current_stock), 2),
+            "unit": ing.unit,
+            "days_until_stockout": days_left,
+            "status": st,
+            "reorder_qty": reorder,
+            "safety_stock": ss,
+            "lead_time_days": ing.lead_time_days,
+            "daily_demand": daily_burn
+        })
+    return items
+
+
+@app.get("/restock", response_model=List[RestockItem], tags=["Restock & Prophecy"])
+def get_restock_list(db: Session = Depends(get_db)):
+    """
+    Returns restock recommendations, days until stockout, health status,
+    and reorder quantities for each ingredient.
+    """
+    return _build_restock_list(db)
+
+
+@app.get("/summary", response_model=SummaryResponse, tags=["Restock & Prophecy"])
+def get_inventory_summary(db: Session = Depends(get_db)):
+    """
+    Returns high-level pantry summary metrics:
+    - low_count: count of items with status 'low'
+    - critical_count: count of items with status 'critical'
+    - alerts_today: alerts recorded today
+    - nearest_stockout_days: minimum days until stockout
+    - total_ingredients: total items in pantry
+    """
+    items = _build_restock_list(db)
+    low_cnt = sum(1 for it in items if it["status"] == "low")
+    critical_cnt = sum(1 for it in items if it["status"] == "critical")
+    safe_cnt = sum(1 for it in items if it["status"] == "safe")
+
+    today_start = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+    alerts_today = db.query(Alert).filter(Alert.ts >= today_start).count()
+    if alerts_today == 0:
+        alerts_today = db.query(Alert).count()
+
+    nearest_days = min((it["days_until_stockout"] for it in items), default=0.0)
+
+    return SummaryResponse(
+        low_count=low_cnt,
+        critical_count=critical_cnt,
+        safe_count=safe_cnt,
+        alerts_today=alerts_today,
+        nearest_stockout_days=nearest_days,
+        total_ingredients=len(items)
+    )
+
+
+# ==============================================================================
+# 8. DEMO SEEDING
 # ==============================================================================
 @app.post("/seed", tags=["System"])
 def seed_endpoint():

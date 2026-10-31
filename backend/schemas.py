@@ -86,3 +86,25 @@ class HealthResponse(BaseModel):
     total_movements: int
     active_alerts: int
 
+# Restock & Inventory Intelligence Schemas
+class RestockItem(BaseModel):
+    ingredient_id: int
+    ingredient: str
+    stock: float
+    unit: str
+    days_until_stockout: float
+    status: str  # 'safe', 'low', 'critical'
+    reorder_qty: float
+    safety_stock: Optional[float] = None
+    lead_time_days: Optional[int] = None
+    daily_demand: Optional[float] = None
+
+class SummaryResponse(BaseModel):
+    low_count: int
+    critical_count: int
+    safe_count: Optional[int] = 0
+    alerts_today: int
+    nearest_stockout_days: Optional[float] = None
+    total_ingredients: int
+
+

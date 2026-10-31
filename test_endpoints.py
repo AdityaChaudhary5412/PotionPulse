@@ -155,3 +155,31 @@ def test_post_predict_friendly_error_on_invalid_file():
     assert "detail" in res.json()
     assert "essential columns" in res.json()["detail"].lower()
 
+def test_get_restock_endpoint():
+    res = client.get("/restock")
+    assert res.status_code == 200
+    data = res.json()
+    assert isinstance(data, list)
+    assert len(data) > 0
+    first = data[0]
+    assert "ingredient_id" in first
+    assert "ingredient" in first
+    assert "stock" in first
+    assert "days_until_stockout" in first
+    assert "status" in first
+    assert first["status"] in ["safe", "low", "critical"]
+    assert "reorder_qty" in first
+    assert first["reorder_qty"] >= 0.0
+
+def test_get_summary_endpoint():
+    res = client.get("/summary")
+    assert res.status_code == 200
+    summary = res.json()
+    assert "low_count" in summary
+    assert "critical_count" in summary
+    assert "alerts_today" in summary
+    assert "nearest_stockout_days" in summary
+    assert "total_ingredients" in summary
+    assert summary["total_ingredients"] >= summary["low_count"] + summary["critical_count"]
+
+
