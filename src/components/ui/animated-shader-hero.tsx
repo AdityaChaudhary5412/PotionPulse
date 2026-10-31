@@ -394,55 +394,6 @@ export const Hero: React.FC<HeroProps> = ({
         `,
       }}
     >
-      <style>{`
-        @keyframes hero-fade-in-down {
-          from {
-            opacity: 0;
-            transform: translateY(-20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        
-        @keyframes hero-fade-in-up {
-          from {
-            opacity: 0;
-            transform: translateY(30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        
-        .hero-animate-fade-in-down {
-          animation: hero-fade-in-down 0.8s ease-out forwards;
-        }
-        
-        .hero-animate-fade-in-up {
-          animation: hero-fade-in-up 0.8s ease-out forwards;
-          opacity: 0;
-        }
-        
-        .hero-delay-200 {
-          animation-delay: 0.2s;
-        }
-        
-        .hero-delay-400 {
-          animation-delay: 0.4s;
-        }
-        
-        .hero-delay-600 {
-          animation-delay: 0.6s;
-        }
-        
-        .hero-delay-800 {
-          animation-delay: 0.8s;
-        }
-      `}</style>
-
       {/* WebGL Canvas */}
       <canvas
         ref={canvasRef}
@@ -450,10 +401,10 @@ export const Hero: React.FC<HeroProps> = ({
       />
 
       {/* Hero Content Overlay */}
-      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen text-white px-4 sm:px-6 lg:px-8 py-20 text-center">
+      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen text-white px-4 sm:px-6 lg:px-8 py-24 text-center">
         {/* Trust Badge */}
         {trustBadge && (
-          <div className="mb-8 hero-animate-fade-in-down">
+          <div className="mb-8">
             <div className="inline-flex items-center gap-2.5 px-6 py-2.5 bg-orange-500/10 backdrop-blur-md border border-orange-400/30 rounded-full text-xs sm:text-sm shadow-xl shadow-orange-950/40">
               {trustBadge.icons && (
                 <div className="flex items-center gap-1">
@@ -479,17 +430,17 @@ export const Hero: React.FC<HeroProps> = ({
         )}
 
         {/* Headings & Subtitle */}
-        <div className="space-y-6 max-w-5xl mx-auto">
-          <div className="space-y-3">
-            <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tight bg-gradient-to-r from-orange-300 via-yellow-400 to-amber-300 bg-clip-text text-transparent hero-animate-fade-in-up hero-delay-200 drop-shadow-md">
+        <div className="space-y-6 max-w-5xl mx-auto px-4">
+          <div className="space-y-2">
+            <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tight bg-gradient-to-r from-orange-300 via-yellow-400 to-amber-300 bg-clip-text text-transparent drop-shadow-md">
               {headline.line1}
             </h1>
-            <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tight bg-gradient-to-r from-yellow-300 via-orange-400 to-red-400 bg-clip-text text-transparent hero-animate-fade-in-up hero-delay-400 drop-shadow-md">
+            <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tight bg-gradient-to-r from-yellow-300 via-orange-400 to-red-400 bg-clip-text text-transparent drop-shadow-md">
               {headline.line2}
             </h1>
           </div>
 
-          <div className="max-w-3xl mx-auto hero-animate-fade-in-up hero-delay-600">
+          <div className="max-w-3xl mx-auto">
             <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-orange-100/90 font-light leading-relaxed">
               {subtitle}
             </p>
@@ -497,7 +448,7 @@ export const Hero: React.FC<HeroProps> = ({
 
           {/* CTA Buttons */}
           {buttons && (
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mt-10 hero-animate-fade-in-up hero-delay-800">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mt-10">
               {buttons.primary && (
                 <button
                   type="button"
@@ -520,7 +471,7 @@ export const Hero: React.FC<HeroProps> = ({
           )}
 
           {children && (
-            <div className="mt-8 flex justify-center w-full hero-animate-fade-in-up hero-delay-800">
+            <div className="mt-8 flex justify-center w-full">
               {children}
             </div>
           )}
