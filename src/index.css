@@ -3,24 +3,50 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --emergent-radius: 20px;
+    --emergent-cyan: #80FFF9;
+    --emergent-green: #81FF89;
+    --emergent-blue: #1759FF;
+  }
+
   body {
-    @apply bg-background text-gray-100 min-h-screen antialiased selection:bg-accent/30 selection:text-white;
+    @apply bg-background text-gray-100 min-h-screen antialiased selection:bg-emergent-cyan/25 selection:text-white;
+    background-image: 
+      radial-gradient(at 0% 0%, rgba(128, 255, 249, 0.03) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, rgba(129, 255, 137, 0.03) 0px, transparent 50%),
+      linear-gradient(to right, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+    background-size: 100% 100%, 100% 100%, 48px 48px, 48px 48px;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
 }
 
+/* Emergent Glass Specular Top Border utility */
+.emergent-glass-card {
+  background: #141417;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  box-shadow: 0 4px 24px -2px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.emergent-glass-card:hover {
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
 /* Custom subtle dark scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 ::-webkit-scrollbar-track {
-  background: #0c0e14;
+  background: #0d0d0f;
 }
 ::-webkit-scrollbar-thumb {
-  background: #262d3d;
-  border-radius: 3px;
+  background: #27272e;
+  border-radius: 10px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #8b5cf6;
+  background: #80FFF9;
 }

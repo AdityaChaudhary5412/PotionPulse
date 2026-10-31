@@ -11,7 +11,8 @@ import AlertsView from './components/alerts/AlertsView';
 import AddStockDialog from './components/modals/AddStockDialog';
 import RecordSaleDialog from './components/modals/RecordSaleDialog';
 import CurseConfigDialog from './components/modals/CurseConfigDialog';
-import { Sparkles, AlertOctagon, X } from 'lucide-react';
+import EmergentAgentBar from './components/agent/EmergentAgentBar';
+import { Sparkles, AlertOctagon, X, Plus } from 'lucide-react';
 
 export default function App() {
   const { isCurseMode, isCurseModalOpen, setCurseModalOpen } = useCurse();
@@ -110,20 +111,20 @@ export default function App() {
       onNavigateAlerts={() => setActiveTab('anomalies')}
       onOpenCurseModal={() => setCurseModalOpen(true)}
     >
-      {/* Toast Notification */}
+      {/* Emergent Toast Notification */}
       {toast && (
         <div
           role="alert"
-          className={`fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-2xl px-4 py-3 text-sm font-medium shadow-2xl border backdrop-blur-md transition-all ${
+          className={`fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-2xl px-4 py-3 text-xs font-medium shadow-2xl border backdrop-blur-xl transition-all ${
             toast.isErr
-              ? 'bg-rose-950/90 text-rose-200 border-rose-800'
-              : 'bg-surface/95 text-purple-200 border-purple-500/40 shadow-purple-950/60'
+              ? 'bg-red-950/90 text-red-200 border-red-500/40 shadow-red-950/60'
+              : 'bg-surface/95 text-white border-white/20 shadow-emergent-glow-cyan'
           }`}
         >
           {toast.isErr ? (
-            <AlertOctagon className="w-4 h-4 text-rose-400 flex-shrink-0" />
+            <AlertOctagon className="w-4 h-4 text-red-400 flex-shrink-0" />
           ) : (
-            <Sparkles className="w-4 h-4 text-purple-400 flex-shrink-0" />
+            <Sparkles className="w-4 h-4 text-emergent-cyan flex-shrink-0" />
           )}
           <span>{toast.msg}</span>
           <button
@@ -195,6 +196,13 @@ export default function App() {
         />
       )}
 
+      {/* EMERGENT CONVERSATIONAL VIBE AGENT BAR */}
+      <EmergentAgentBar
+        onNavigateTab={setActiveTab}
+        onRefreshAll={refreshAll}
+        showToast={showToast}
+      />
+
       {/* DIALOG 1: ADD STOCK (RESTOCK) */}
       <AddStockDialog
         isOpen={!!stockItem}
@@ -232,71 +240,74 @@ export default function App() {
 
       {/* DIALOG 4: NEW REAGENT MODAL */}
       {newReagentOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-          <div className="w-full max-w-sm rounded-2xl border border-surface-border bg-surface p-6 shadow-2xl">
-            <h3 className="text-lg font-bold text-white">Add New Potion Reagent</h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-in fade-in duration-200">
+          <div className="w-full max-w-sm emergent-glass-card bg-surface/95 backdrop-blur-2xl p-6 shadow-2xl rounded-emergent-lg border border-white/10">
+            <h3 className="text-base font-bold text-white tracking-tight flex items-center gap-2">
+              <Plus className="w-4 h-4 text-emergent-cyan" />
+              <span>Add New Potion Reagent</span>
+            </h3>
 
             <form onSubmit={handleCreateReagent} className="mt-4 space-y-3">
               <div>
-                <label className="block text-xs font-medium text-gray-300">Reagent Name:</label>
+                <label className="block text-xs font-semibold text-gray-300 uppercase tracking-wider">Reagent Name</label>
                 <input
                   type="text"
                   required
                   placeholder="e.g. Basilisk Fang"
                   value={newReagent.name}
                   onChange={(e) => setNewReagent({ ...newReagent, name: e.target.value })}
-                  className="mt-1 w-full rounded-xl border border-surface-border bg-surface-subtle p-2.5 text-sm text-white focus:border-accent focus:outline-none"
+                  className="mt-1 w-full rounded-xl border border-surface-border bg-surface-subtle p-2.5 text-xs text-white placeholder-gray-500 focus:border-white/30 focus:outline-none"
                 />
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block text-xs font-medium text-gray-300">Unit:</label>
+                  <label className="block text-xs font-semibold text-gray-300 uppercase tracking-wider">Unit</label>
                   <input
                     type="text"
                     required
                     placeholder="e.g. vials, pairs"
                     value={newReagent.unit}
                     onChange={(e) => setNewReagent({ ...newReagent, unit: e.target.value })}
-                    className="mt-1 w-full rounded-xl border border-surface-border bg-surface-subtle p-2.5 text-sm text-white focus:border-accent focus:outline-none"
+                    className="mt-1 w-full rounded-xl border border-surface-border bg-surface-subtle p-2.5 text-xs text-white placeholder-gray-500 focus:border-white/30 focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-300">Initial Stock:</label>
+                  <label className="block text-xs font-semibold text-gray-300 uppercase tracking-wider">Initial Stock</label>
                   <input
                     type="number"
                     min="0"
                     required
                     value={newReagent.current_stock}
                     onChange={(e) => setNewReagent({ ...newReagent, current_stock: Number(e.target.value) })}
-                    className="mt-1 w-full rounded-xl border border-surface-border bg-surface-subtle p-2.5 text-sm text-white focus:border-accent focus:outline-none"
+                    className="mt-1 w-full rounded-xl border border-surface-border bg-surface-subtle p-2.5 text-xs text-white font-mono focus:border-white/30 focus:outline-none"
                   />
                 </div>
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-300">Lead Time (Days):</label>
+                <label className="block text-xs font-semibold text-gray-300 uppercase tracking-wider">Lead Time (Days)</label>
                 <input
                   type="number"
                   min="1"
                   required
                   value={newReagent.lead_time_days}
                   onChange={(e) => setNewReagent({ ...newReagent, lead_time_days: Number(e.target.value) })}
-                  className="mt-1 w-full rounded-xl border border-surface-border bg-surface-subtle p-2.5 text-sm text-white focus:border-accent focus:outline-none"
+                  className="mt-1 w-full rounded-xl border border-surface-border bg-surface-subtle p-2.5 text-xs text-white font-mono focus:border-white/30 focus:outline-none"
                 />
               </div>
 
-              <div className="flex justify-end gap-2 pt-2">
+              <div className="flex justify-end gap-2 pt-2 border-t border-surface-border">
                 <button
                   type="button"
                   onClick={() => setNewReagentOpen(false)}
-                  className="rounded-xl border border-surface-border px-4 py-2 text-xs font-medium text-gray-300 hover:bg-surface-subtle"
+                  className="rounded-xl px-4 py-2 text-xs font-medium text-gray-400 hover:text-white hover:bg-surface-subtle transition-all"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="rounded-xl bg-accent px-4 py-2 text-xs font-semibold text-white shadow-lg hover:bg-accent-hover"
+                  className="rounded-xl bg-white text-black px-4 py-2 text-xs font-bold shadow-sm hover:bg-gray-100 transition-all active:scale-95"
                 >
-                  Create
+                  Create Reagent
                 </button>
               </div>
             </form>

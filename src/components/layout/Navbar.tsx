@@ -1,7 +1,7 @@
 import React from 'react';
 import { useCurse } from '../../context/CurseContext';
 import {
-  Sparkles, Flame, Database, RefreshCw, Zap, Bell, Sliders, XCircle
+  Sparkles, Flame, Database, RefreshCw, Zap, Bell, Sliders, XCircle, Search, Terminal
 } from 'lucide-react';
 import api from '../../services/api';
 
@@ -10,13 +10,15 @@ interface NavbarProps {
   alertCount?: number;
   onNavigateAlerts?: () => void;
   onOpenCurseModal?: () => void;
+  onQuickSearchClick?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
   onRefresh,
   alertCount = 0,
   onNavigateAlerts,
-  onOpenCurseModal
+  onOpenCurseModal,
+  onQuickSearchClick
 }) => {
   const {
     isCurseMode,
@@ -50,41 +52,42 @@ export const Navbar: React.FC<NavbarProps> = ({
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-surface-border bg-surface/95 backdrop-blur-md">
-      {/* GLOBAL MIDNIGHT CURSE BANNER (SHOWN ON EVERY SCREEN WHEN ACTIVE) */}
+    <header className="sticky top-0 z-50 w-full border-b border-surface-border bg-background/90 backdrop-blur-xl">
+      {/* GLOBAL MIDNIGHT CURSE BANNER (EMERGENT NEON SURGE STYLE) */}
       {isCurseMode && (
-        <div className="bg-gradient-to-r from-purple-950 via-rose-950 to-purple-950 px-4 py-2 text-center text-xs font-medium text-purple-200 border-b border-rose-800/60 shadow-lg shadow-purple-950/50 flex flex-wrap items-center justify-center gap-2 sm:gap-4 animate-in slide-in-from-top duration-300">
+        <div className="bg-gradient-to-r from-red-950/90 via-surface to-red-950/90 px-4 py-2 text-center text-xs font-medium text-white border-b border-red-500/30 shadow-lg shadow-red-950/50 flex flex-wrap items-center justify-center gap-2 sm:gap-4 animate-in slide-in-from-top duration-300">
           <div className="flex items-center gap-2">
-            <Flame className="w-4 h-4 text-rose-400 animate-pulse flex-shrink-0" />
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+            </span>
             <span>
-              <strong className="text-rose-300 uppercase tracking-wide">
-                {curseEvent?.name || 'MIDNIGHT CURSE'} ACTIVE:
+              <strong className="text-red-400 font-bold uppercase tracking-wider">
+                {curseEvent?.name || 'MIDNIGHT SURGE'} ACTIVE:
               </strong>{' '}
-              Demand amplified by{' '}
-              <strong className="text-rose-200 font-mono text-sm underline">
+              Demand shockwave amplified{' '}
+              <strong className="text-emergent-green font-mono text-xs px-1.5 py-0.5 rounded bg-black/40 border border-emergent-green/30">
                 {curseMultiplier.toFixed(1)}x
               </strong>{' '}
-              on {curseEvent?.ingredient_ids?.length || 3} targeted reagents!
+              across pantry shelves!
             </span>
           </div>
 
           <div className="flex items-center gap-2">
-            {/* Quick configure button */}
             <button
               onClick={handleCurseConfigure}
-              className="text-[11px] underline text-purple-300 hover:text-white transition-colors"
+              className="text-[11px] font-medium text-gray-300 hover:text-white px-2 py-0.5 rounded border border-white/10 hover:border-white/20 transition-all"
             >
-              Configure
+              Tune Multiplier
             </button>
 
-            {/* ONE-CLICK TURN OFF / DISPEL CURSE BUTTON */}
             <button
               onClick={deactivateCurse}
-              className="flex items-center gap-1.5 rounded-lg bg-rose-900/60 hover:bg-rose-800 text-rose-200 px-3 py-1 text-[11px] font-bold border border-rose-600/60 shadow-sm transition-all hover:scale-105 active:scale-95"
+              className="flex items-center gap-1.5 rounded-full bg-red-500/20 hover:bg-red-500/30 text-red-300 px-3 py-0.5 text-[11px] font-bold border border-red-500/40 transition-all hover:scale-105 active:scale-95"
               title="Dispel active demand curse immediately and reset numbers to baseline"
             >
               <XCircle className="w-3.5 h-3.5" />
-              <span>Turn Off Curse</span>
+              <span>Dispel Curse</span>
             </button>
           </div>
         </div>
@@ -92,106 +95,123 @@ export const Navbar: React.FC<NavbarProps> = ({
 
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between gap-3 sm:gap-4">
-          {/* Logo & App Name */}
+          {/* Emergent Minimalist Logo & Workspace Breadcrumbs */}
           <div className="flex items-center gap-3">
-            <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-purple-600 to-indigo-800 p-2 shadow-lg shadow-purple-900/40 ring-1 ring-purple-400/30 flex-shrink-0">
-              <Sparkles className="h-5 w-5 text-purple-100" />
-              <div className="absolute -bottom-1 -right-1 h-3.5 w-3.5 rounded-full bg-emerald-500 ring-2 ring-surface" />
+            <div className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-surface-subtle to-surface border border-white/15 p-2 shadow-sm flex-shrink-0">
+              <Sparkles className="h-4 w-4 text-emergent-cyan" />
+              <div className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-emergent-green ring-2 ring-background animate-pulse" />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="font-display text-lg sm:text-xl font-bold tracking-tight text-white">
+            
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
+                <span className="font-sans text-base font-bold tracking-tight text-white">
                   PotionPulse
                 </span>
-                <span className="hidden rounded-md bg-purple-900/60 px-2 py-0.5 text-[10px] font-semibold text-purple-300 ring-1 ring-purple-500/30 sm:inline-block">
-                  v2.0
+                <span className="text-gray-500 font-mono text-xs hidden sm:inline">/</span>
+                <span className="text-xs text-gray-400 font-medium hidden sm:inline">
+                  Hexley Pantry
                 </span>
               </div>
-              <p className="text-[11px] text-gray-400 hidden xs:block">
-                The Witch's Potion Pantry · Smart Inventory & Prophecy
-              </p>
+              <span className="rounded-full bg-white/5 px-2 py-0.5 text-[10px] font-mono font-medium text-gray-300 border border-white/10">
+                v2.0
+              </span>
             </div>
           </div>
 
-          {/* Controls: Alerts Badge, Seed, Refresh, Curse Switch */}
+          {/* Emergent Center Command Bar Pill (Desktop) */}
+          <div 
+            onClick={onQuickSearchClick}
+            className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-subtle/80 border border-surface-border text-gray-400 hover:text-gray-200 hover:border-white/20 transition-all cursor-pointer text-xs w-72 justify-between"
+          >
+            <div className="flex items-center gap-2">
+              <Search className="w-3.5 h-3.5 text-emergent-cyan" />
+              <span className="truncate">Search reagents, threats, stock...</span>
+            </div>
+            <kbd className="hidden lg:inline-block font-mono text-[10px] bg-black/40 px-1.5 py-0.5 rounded border border-white/10 text-gray-400">
+              ⌘K
+            </kbd>
+          </div>
+
+          {/* Right Action Controls: Alerts, Seed, Refresh, Curse Switch */}
           <div className="flex items-center gap-2 sm:gap-3">
-            {/* 1. RECENT ALERT COUNT BUTTON IN NAVBAR */}
+            {/* 1. Alerts Feed Button */}
             <button
               onClick={onNavigateAlerts}
               title={alertCount > 0 ? `${alertCount} recent anomalies detected` : 'No active alerts'}
-              className="relative flex items-center justify-center p-2 rounded-xl border border-surface-border bg-surface-subtle text-gray-300 hover:text-white hover:bg-surface-border transition-all"
+              className="relative flex items-center justify-center p-2 rounded-xl border border-surface-border bg-surface-subtle text-gray-300 hover:text-white hover:border-white/20 transition-all"
             >
-              <Bell className="w-4 h-4 text-purple-300" />
+              <Bell className="w-4 h-4 text-gray-300" />
               {alertCount > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-rose-600 px-1 text-[10px] font-bold text-white shadow-lg shadow-rose-900/80 ring-2 ring-surface animate-bounce">
+                <span className="absolute -top-1 -right-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white shadow-lg ring-2 ring-background">
                   {alertCount > 99 ? '99+' : alertCount}
                 </span>
               )}
             </button>
 
-            {/* Seed Demo Button */}
+            {/* 2. Seed Demo Button */}
             <button
               onClick={handleSeed}
               disabled={seeding}
               title="Reseed Pantry Ledger with sample data"
-              className="hidden md:flex items-center gap-1.5 rounded-lg border border-surface-border bg-surface-subtle px-3 py-1.5 text-xs font-medium text-gray-300 hover:bg-surface-border hover:text-white transition-all disabled:opacity-50"
+              className="hidden sm:flex items-center gap-1.5 rounded-xl border border-surface-border bg-surface-subtle px-3 py-1.5 text-xs font-medium text-gray-200 hover:bg-surface hover:border-white/20 hover:text-white transition-all disabled:opacity-50"
             >
-              <Database className="w-3.5 h-3.5 text-purple-400" />
+              <Database className="w-3.5 h-3.5 text-emergent-cyan" />
               <span>{seeding ? 'Seeding...' : 'Reseed Demo'}</span>
             </button>
 
-            {/* Quick Refresh */}
+            {/* 3. Quick Refresh */}
             {onRefresh && (
               <button
                 onClick={onRefresh}
                 title="Refresh pantry metrics"
-                className="flex items-center justify-center p-2 rounded-lg border border-surface-border bg-surface-subtle text-gray-300 hover:text-white hover:bg-surface-border transition-all"
+                className="flex items-center justify-center p-2 rounded-xl border border-surface-border bg-surface-subtle text-gray-300 hover:text-white hover:border-white/20 transition-all"
               >
                 <RefreshCw className="w-4 h-4" />
               </button>
             )}
 
-            {/* 2. CURSE MODE FLOW SWITCH & BUTTON */}
-            <div className="flex items-center gap-1.5 sm:gap-2 rounded-xl border border-purple-500/30 bg-purple-950/25 p-1 sm:p-1.5 ring-1 ring-purple-500/20 shadow-sm">
+            {/* 4. EMERGENT CURSE / VIBE MODE TOGGLE */}
+            <div className={`flex items-center gap-1.5 sm:gap-2 rounded-xl border p-1 sm:p-1.5 transition-all ${
+              isCurseMode 
+                ? 'border-red-500/50 bg-red-950/20 shadow-emergent-glow-green' 
+                : 'border-surface-border bg-surface-subtle'
+            }`}>
               <div className="flex flex-col text-right pl-2 hidden sm:block">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-purple-300 flex items-center gap-1 justify-end">
-                  <Zap className="w-3 h-3 text-purple-400" />
+                <span className={`text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 justify-end ${
+                  isCurseMode ? 'text-red-400' : 'text-gray-400'
+                }`}>
+                  <Zap className={`w-3 h-3 ${isCurseMode ? 'text-red-400' : 'text-gray-500'}`} />
                   Curse Mode
                 </span>
-                <span className="text-[9px] text-gray-400">
-                  {isCurseMode ? `${curseMultiplier.toFixed(1)}x Demand Surge` : 'Standard Baseline'}
+                <span className="text-[10px] text-gray-400 font-mono">
+                  {isCurseMode ? `${curseMultiplier.toFixed(1)}x Surge` : 'Baseline'}
                 </span>
               </div>
 
-              {/* Configure button if off or on */}
+              {/* Configure button */}
               <button
-                type="button"
                 onClick={handleCurseConfigure}
-                title="Configure targeted ingredients & multiplier for Curse Mode"
-                className="p-1 rounded-lg text-purple-300 hover:text-white hover:bg-purple-900/50 transition-colors"
+                title="Configure curse parameters"
+                className="flex items-center justify-center p-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-surface transition-all"
               >
                 <Sliders className="w-3.5 h-3.5" />
               </button>
 
-              {/* Interactive Toggle Switch */}
+              {/* The Switch Toggle */}
               <button
                 type="button"
                 role="switch"
                 aria-checked={isCurseMode}
                 onClick={toggleCurseMode}
-                title={isCurseMode ? 'Click to deactivate Curse Mode immediately' : 'Click to summon Curse Mode'}
-                className={`relative inline-flex h-7 w-12 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-surface ${
-                  isCurseMode ? 'bg-gradient-to-r from-purple-600 to-rose-600 shadow-md shadow-rose-950/50' : 'bg-gray-700'
+                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                  isCurseMode ? 'bg-red-500 shadow-sm shadow-red-500/50' : 'bg-surface-border'
                 }`}
               >
-                <span className="sr-only">Toggle Curse Mode</span>
                 <span
-                  className={`pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out flex items-center justify-center ${
-                    isCurseMode ? 'translate-x-5 text-rose-600' : 'translate-x-0 text-gray-500'
+                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
+                    isCurseMode ? 'translate-x-5' : 'translate-x-0'
                   }`}
-                >
-                  <Flame className={`w-3.5 h-3.5 ${isCurseMode ? 'fill-current' : 'opacity-40'}`} />
-                </span>
+                />
               </button>
             </div>
           </div>

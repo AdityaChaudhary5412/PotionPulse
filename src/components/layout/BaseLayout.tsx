@@ -1,7 +1,20 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Navbar from './Navbar';
 import BottomNav from './BottomNav';
 import { useCurse } from '../../context/CurseContext';
+import {
+  LayoutDashboard,
+  Boxes,
+  TrendingUp,
+  AlertTriangle,
+  Sparkles,
+  Command,
+  Zap,
+  Sliders,
+  ChevronRight,
+  ShieldCheck,
+  Bot
+} from 'lucide-react';
 
 interface BaseLayoutProps {
   children: React.ReactNode;
@@ -22,16 +35,43 @@ export const BaseLayout: React.FC<BaseLayoutProps> = ({
   onNavigateAlerts,
   onOpenCurseModal
 }) => {
-  const tabs = [
-    { id: 'dashboard', label: 'Dashboard', icon: '✨' },
-    { id: 'inventory', label: 'Inventory Ledger', icon: '📦' },
-    { id: 'demand', label: 'Demand Prophecy', icon: '🔮' },
-    { id: 'anomalies', label: 'Strange Happenings', icon: '💀' },
+  const { isCurseMode, curseMultiplier, toggleCurseMode, setCurseModalOpen } = useCurse();
+
+  const navigationItems = [
+    {
+      id: 'dashboard',
+      label: 'Overview & Shelves',
+      shortLabel: 'Dashboard',
+      icon: LayoutDashboard,
+      desc: 'Pantry stock & depletion'
+    },
+    {
+      id: 'inventory',
+      label: 'Inventory Ledger',
+      shortLabel: 'Ledger',
+      icon: Boxes,
+      desc: 'Reagents & transactions'
+    },
+    {
+      id: 'demand',
+      label: 'Demand Prophecy',
+      shortLabel: 'Prophecy',
+      icon: TrendingUp,
+      desc: 'LightGBM forecast & bands'
+    },
+    {
+      id: 'anomalies',
+      label: 'Threat & Anomaly Feed',
+      shortLabel: 'Threats',
+      icon: AlertTriangle,
+      desc: 'Spikes, leaks & drop-to-zero',
+      badge: alertCount > 0 ? alertCount : undefined
+    },
   ];
 
   return (
     <div className="min-h-screen bg-background text-gray-100 flex flex-col font-sans">
-      {/* Top Navbar with Logo, Curse Mode Switch, and Alert Count Badge */}
+      {/* Top Navbar */}
       <Navbar
         onRefresh={onRefresh}
         alertCount={alertCount}
@@ -39,44 +79,120 @@ export const BaseLayout: React.FC<BaseLayoutProps> = ({
         onOpenCurseModal={onOpenCurseModal}
       />
 
-      {/* Desktop / Tablet Sub-Navbar (hidden on mobile small screens in favor of BottomNav) */}
-      {onTabChange && (
-        <nav className="hidden sm:block border-b border-surface-border bg-surface/60 backdrop-blur sticky top-16 z-40">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="flex space-x-1 sm:space-x-2 overflow-x-auto py-2 no-scrollbar">
-              {tabs.map((tab) => {
-                const isActive = activeTab === tab.id;
+      <div className="flex-1 flex w-full mx-auto max-w-7xl">
+        {/* ============================================================== */}
+        {/* EMERGENT DESKTOP SIDEBAR (Visible on md: and larger screens)     */}
+        {/* ============================================================== */}
+        {onTabChange && (
+          <aside className="hidden md:flex flex-col w-64 border-r border-surface-border bg-background/50 p-4 shrink-0 space-y-6 sticky top-16 h-[calc(100vh-4rem)]">
+            {/* Workspace & Mode Pill */}
+            <div className="px-2 py-1.5 rounded-xl bg-surface-subtle/80 border border-surface-border flex items-center justify-between text-xs">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-emergent-green animate-pulse" />
+                <span className="font-semibold text-gray-200">Active Pantry</span>
+              </div>
+              <span className="font-mono text-[10px] text-emergent-cyan bg-emergent-cyan/10 px-1.5 py-0.5 rounded border border-emergent-cyan/20">
+                LightGBM v2
+              </span>
+            </div>
+
+            {/* Navigation Group */}
+            <div className="space-y-1">
+              <p className="px-3 text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-2">
+                Pantry Intelligence
+              </p>
+              {navigationItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = activeTab === item.id;
                 return (
                   <button
-                    key={tab.id}
-                    onClick={() => onTabChange(tab.id)}
-                    className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap transition-all ${
+                    key={item.id}
+                    onClick={() => onTabChange(item.id)}
+                    className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium transition-all group ${
                       isActive
-                        ? 'bg-accent/20 text-accent-light border border-accent/40 shadow-sm shadow-accent/20'
+                        ? 'bg-surface-elevated text-white border border-white/15 shadow-sm shadow-black/40'
                         : 'text-gray-400 hover:text-white hover:bg-surface-subtle'
                     }`}
                   >
-                    <span>{tab.icon}</span>
-                    <span>{tab.label}</span>
-                    {tab.id === 'anomalies' && alertCount > 0 && (
-                      <span className="ml-1 rounded-full bg-rose-600 px-1.5 py-0.2 text-[10px] font-bold text-white shadow-sm">
-                        {alertCount}
+                    <div className="flex items-center gap-2.5">
+                      <div className={`p-1.5 rounded-lg transition-colors ${
+                        isActive
+                          ? 'bg-emergent-cyan/15 text-emergent-cyan'
+                          : 'text-gray-400 group-hover:text-gray-200'
+                      }`}>
+                        <Icon className="w-4 h-4" />
+                      </div>
+                      <div className="text-left">
+                        <div className={`leading-tight ${isActive ? 'font-semibold text-white' : ''}`}>
+                          {item.label}
+                        </div>
+                      </div>
+                    </div>
+
+                    {item.badge !== undefined && (
+                      <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-red-500/20 text-red-400 border border-red-500/30">
+                        {item.badge}
                       </span>
                     )}
                   </button>
                 );
               })}
             </div>
-          </div>
-        </nav>
-      )}
 
-      {/* Main Content Area - Mobile-First Responsive (with pb-20 on mobile for BottomNav) */}
-      <main className="flex-1 w-full mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 pb-24 sm:pb-8">
-        {children}
-      </main>
+            {/* Emergent Curse / Surge Controller Card in Sidebar */}
+            <div className="mt-auto pt-4 border-t border-surface-border">
+              <div className={`p-3 rounded-2xl border transition-all ${
+                isCurseMode
+                  ? 'border-red-500/40 bg-red-950/20'
+                  : 'border-surface-border bg-surface/60'
+              }`}>
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-1.5">
+                    <Zap className={`w-3.5 h-3.5 ${isCurseMode ? 'text-red-400' : 'text-emergent-cyan'}`} />
+                    <span className="text-xs font-semibold text-white">Curse Stress Test</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={toggleCurseMode}
+                    className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full transition-colors ${
+                      isCurseMode ? 'bg-red-500' : 'bg-surface-border'
+                    }`}
+                  >
+                    <span
+                      className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white transition duration-200 ${
+                        isCurseMode ? 'translate-x-4' : 'translate-x-0.5'
+                      }`}
+                    />
+                  </button>
+                </div>
+                <p className="text-[11px] text-gray-400 leading-snug">
+                  {isCurseMode
+                    ? `Surge active: +${curseMultiplier.toFixed(1)}x demand multiplier across recipes.`
+                    : 'Simulate high-impact surges & Halloween rush.'}
+                </p>
+              </div>
 
-      {/* MOBILE BOTTOM NAVIGATION (appears exclusively on small screens) */}
+              {/* System Footer Badge */}
+              <div className="mt-4 px-2 flex items-center justify-between text-[11px] text-gray-500">
+                <span className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emergent-green" />
+                  Engine Online
+                </span>
+                <span className="font-mono text-[10px]">v2.0</span>
+              </div>
+            </div>
+          </aside>
+        )}
+
+        {/* ============================================================== */}
+        {/* MAIN CANVAS CONTENT AREA                                       */}
+        {/* ============================================================== */}
+        <main className="flex-1 w-full p-4 sm:p-6 lg:p-8 pb-28 md:pb-8 max-w-full overflow-hidden">
+          {children}
+        </main>
+      </div>
+
+      {/* MOBILE BOTTOM NAVIGATION (exclusively on small screens) */}
       {onTabChange && (
         <BottomNav
           activeTab={activeTab}
@@ -84,22 +200,6 @@ export const BaseLayout: React.FC<BaseLayoutProps> = ({
           alertCount={alertCount}
         />
       )}
-
-      {/* Subtle Dark Footer */}
-      <footer className="hidden sm:block border-t border-surface-border bg-surface/40 py-4 mt-auto">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-500">
-          <div className="flex items-center gap-2">
-            <div className="h-2 w-2 rounded-full bg-emerald-400" />
-            <span>FastAPI SQLite & Postgres Engine</span>
-            <span className="text-gray-600">|</span>
-            <span>Capacitor Mobile Ready</span>
-          </div>
-          <div className="flex items-center gap-4">
-            <span className="text-gray-400">Track 1: The Witch's Potion Pantry</span>
-            <span className="text-purple-400 font-mono">PotionPulse 2.0</span>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 };

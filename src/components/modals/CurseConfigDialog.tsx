@@ -88,19 +88,19 @@ export const CurseConfigDialog: React.FC<CurseConfigDialogProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-      <div className="w-full max-w-lg rounded-2xl border border-purple-800/60 bg-surface p-6 shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto no-scrollbar">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-in fade-in duration-200">
+      <div className="w-full max-w-lg emergent-glass-card bg-surface/95 backdrop-blur-2xl p-6 shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto no-scrollbar rounded-emergent-lg border border-red-500/30">
         {/* Header */}
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-rose-950/80 border border-rose-800/80 text-rose-400 shadow-lg shadow-rose-950/50">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-red-500/15 border border-red-500/30 text-red-400 shadow-emergent-glow-green">
               <Flame className="w-6 h-6 animate-pulse" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                <span>Summon Demand Curse</span>
-                <span className="rounded-md bg-purple-900/60 px-2 py-0.5 text-[10px] font-semibold text-purple-300 border border-purple-700/40">
-                  Event Surge
+              <h3 className="text-lg font-bold text-white tracking-tight flex items-center gap-2">
+                <span>Configure Demand Surge</span>
+                <span className="rounded-full bg-red-500/20 px-2 py-0.5 text-[10px] font-mono font-bold text-red-400 border border-red-500/30">
+                  Curse Stress Test
                 </span>
               </h3>
               <p className="text-xs text-gray-400 mt-0.5">
@@ -278,21 +278,21 @@ export const CurseConfigDialog: React.FC<CurseConfigDialogProps> = ({
           </div>
 
           {/* Action Buttons */}
-          <div className="flex justify-end gap-2.5 pt-3 border-t border-surface-border/60">
+          <div className="flex justify-end gap-2.5 pt-3 border-t border-surface-border">
             <button
               type="button"
               onClick={onClose}
-              className="rounded-xl border border-surface-border px-4 py-2.5 text-xs font-medium text-gray-300 hover:bg-surface-subtle transition-colors"
+              className="rounded-xl px-4 py-2.5 text-xs font-medium text-gray-400 hover:text-white hover:bg-surface-subtle transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={submitting}
-              className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-purple-600 to-rose-600 px-5 py-2.5 text-xs font-semibold text-white shadow-lg shadow-purple-950/60 hover:from-purple-500 hover:to-rose-500 transition-all disabled:opacity-50"
+              className="flex items-center gap-2 rounded-xl bg-red-500 hover:bg-red-600 px-5 py-2.5 text-xs font-bold text-white shadow-lg transition-all active:scale-95 disabled:opacity-50"
             >
               <Zap className="w-4 h-4 fill-current" />
-              <span>{submitting ? 'Summoning...' : `Summon ${multiplier}x Curse`}</span>
+              <span>{submitting ? 'Summoning...' : `Summon ${multiplier}x Surge`}</span>
             </button>
           </div>
         </form>

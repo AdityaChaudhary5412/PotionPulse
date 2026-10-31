@@ -62,18 +62,18 @@ export const RecordSaleDialog: React.FC<RecordSaleDialogProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-      <div className="w-full max-w-md rounded-2xl border border-surface-border bg-surface p-6 shadow-2xl space-y-5">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-in fade-in duration-200">
+      <div className="w-full max-w-md emergent-glass-card bg-surface/95 backdrop-blur-2xl p-6 shadow-2xl space-y-5 rounded-emergent-lg border border-white/10">
         {/* Header */}
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-950/60 border border-purple-800/40 text-purple-400">
-              <FlaskConical className="w-5 h-5" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emergent-cyan/15 border border-emergent-cyan/30 text-emergent-cyan">
+              <FlaskConical className="w-5 h-5 text-emergent-cyan" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-white">Record Sale / Brew</h3>
+              <h3 className="text-base font-bold text-white tracking-tight">Record Sale / Brew</h3>
               <p className="text-xs text-gray-400">
-                Dispense <strong className="text-purple-300">{item.ingredient}</strong>
+                Dispense <strong className="text-gray-200">{item.ingredient}</strong>
               </p>
             </div>
           </div>
@@ -86,7 +86,7 @@ export const RecordSaleDialog: React.FC<RecordSaleDialogProps> = ({
         </div>
 
         {/* Current & projected stock badge */}
-        <div className="grid grid-cols-2 gap-2 rounded-xl bg-surface-subtle p-3 text-xs">
+        <div className="grid grid-cols-2 gap-2 rounded-xl bg-surface-subtle p-3 text-xs border border-surface-border">
           <div>
             <span className="text-gray-400 block text-[10px] uppercase font-semibold">Current Stock</span>
             <span className="font-mono font-bold text-white">
@@ -95,7 +95,7 @@ export const RecordSaleDialog: React.FC<RecordSaleDialogProps> = ({
           </div>
           <div>
             <span className="text-gray-400 block text-[10px] uppercase font-semibold">After Dispense</span>
-            <span className={`font-mono font-bold ${remainingAfter < 0 ? 'text-rose-400' : 'text-purple-300'}`}>
+            <span className={`font-mono font-bold ${remainingAfter < 0 ? 'text-status-critical' : 'text-emergent-cyan'}`}>
               {remainingAfter.toFixed(1)} {item.unit}
             </span>
           </div>
@@ -105,7 +105,7 @@ export const RecordSaleDialog: React.FC<RecordSaleDialogProps> = ({
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-xs font-semibold text-gray-300">
-              Quantity to Dispense ({item.unit}) <span className="text-rose-400">*</span>:
+              Quantity to Dispense ({item.unit}) <span className="text-status-critical">*</span>:
             </label>
             <input
               type="number"
@@ -119,10 +119,10 @@ export const RecordSaleDialog: React.FC<RecordSaleDialogProps> = ({
                 setValidationError(null);
               }}
               placeholder="e.g. 2.0"
-              className="mt-1.5 w-full rounded-xl border border-surface-border bg-surface-subtle p-3 text-sm text-white placeholder-gray-500 focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+              className="mt-1.5 w-full rounded-xl border border-surface-border bg-surface-subtle p-3 text-sm text-white placeholder-gray-500 focus:border-white/30 focus:outline-none font-mono"
             />
             {validationError && (
-              <div className="mt-2 flex items-center gap-1.5 text-xs text-rose-400 font-medium">
+              <div className="mt-2 flex items-center gap-1.5 text-xs text-status-critical font-medium">
                 <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0" />
                 <span>{validationError}</span>
               </div>
@@ -138,26 +138,26 @@ export const RecordSaleDialog: React.FC<RecordSaleDialogProps> = ({
               value={note}
               onChange={(e) => setNote(e.target.value)}
               placeholder="e.g. Invisibility Potion, Fire Breath Draught"
-              className="mt-1.5 w-full rounded-xl border border-surface-border bg-surface-subtle p-3 text-sm text-white placeholder-gray-500 focus:border-accent focus:outline-none"
+              className="mt-1.5 w-full rounded-xl border border-surface-border bg-surface-subtle p-3 text-sm text-white placeholder-gray-500 focus:border-white/30 focus:outline-none"
             />
           </div>
 
           {/* Action buttons */}
-          <div className="flex justify-end gap-2.5 pt-3 border-t border-surface-border/60">
+          <div className="flex justify-end gap-2.5 pt-3 border-t border-surface-border">
             <button
               type="button"
               disabled={submitting}
               onClick={onClose}
-              className="rounded-xl border border-surface-border bg-surface-subtle px-4 py-2.5 text-xs font-semibold text-gray-300 hover:bg-surface-border transition-colors disabled:opacity-50"
+              className="rounded-xl px-4 py-2.5 text-xs font-semibold text-gray-300 hover:bg-surface-subtle transition-colors disabled:opacity-50"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={submitting || parsedQty > item.stock}
-              className="flex items-center gap-1.5 rounded-xl bg-purple-600 px-5 py-2.5 text-xs font-semibold text-white shadow-lg shadow-purple-950/40 hover:bg-purple-500 transition-all disabled:opacity-50"
+              className="flex items-center gap-1.5 rounded-xl bg-white text-black px-5 py-2.5 text-xs font-bold shadow-sm hover:bg-gray-100 transition-all active:scale-95 disabled:opacity-50"
             >
-              <ArrowDownRight className="w-4 h-4" />
+              <ArrowDownRight className="w-4 h-4 text-black" />
               <span>{submitting ? 'Dispensing...' : 'Record Sale'}</span>
             </button>
           </div>

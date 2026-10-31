@@ -70,23 +70,23 @@ export const AlertsView: React.FC<AlertsViewProps> = ({
     const s = severity.toLowerCase();
     if (s === 'critical' || s === 'high') {
       return (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-rose-950/80 text-rose-300 border border-rose-800/80 shadow-sm shadow-rose-950/50">
-          <AlertOctagon className="w-3.5 h-3.5 text-rose-400 animate-pulse flex-shrink-0" />
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-status-critical-bg text-status-critical border border-status-critical-border shadow-sm">
+          <AlertOctagon className="w-3 h-3 text-status-critical animate-pulse flex-shrink-0" />
           <span>{s}</span>
         </span>
       );
     }
     if (s === 'medium') {
       return (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-950/70 text-amber-300 border border-amber-800/60">
-          <AlertTriangle className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-status-low-bg text-status-low border border-status-low-border">
+          <AlertTriangle className="w-3 h-3 text-status-low flex-shrink-0" />
           <span>Medium</span>
         </span>
       );
     }
     return (
-      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-purple-950/50 text-purple-300 border border-purple-800/50">
-        <Info className="w-3.5 h-3.5 text-purple-400 flex-shrink-0" />
+      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emergent-cyan/10 text-emergent-cyan border border-emergent-cyan/30">
+        <Info className="w-3 h-3 text-emergent-cyan flex-shrink-0" />
         <span>Low</span>
       </span>
     );
@@ -168,34 +168,34 @@ export const AlertsView: React.FC<AlertsViewProps> = ({
 
       {/* Summary Stat Pills */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="rounded-xl border border-surface-border bg-surface p-3 flex items-center justify-between">
+        <div className="emergent-glass-card p-3.5 flex items-center justify-between">
           <span className="text-xs text-gray-400">Total Alerts</span>
           <span className="text-base font-bold font-mono text-white">{counts.total}</span>
         </div>
-        <div className="rounded-xl border border-rose-900/40 bg-rose-950/20 p-3 flex items-center justify-between">
-          <span className="text-xs text-rose-400 flex items-center gap-1">
+        <div className="emergent-glass-card p-3.5 flex items-center justify-between border-red-500/30">
+          <span className="text-xs text-status-critical flex items-center gap-1.5 font-medium">
             <AlertOctagon className="w-3.5 h-3.5" /> Urgent Threats
           </span>
-          <span className="text-base font-bold font-mono text-rose-300">
+          <span className="text-base font-bold font-mono text-status-critical">
             {counts.critical + counts.high}
           </span>
         </div>
-        <div className="rounded-xl border border-amber-900/40 bg-amber-950/20 p-3 flex items-center justify-between">
-          <span className="text-xs text-amber-400 flex items-center gap-1">
+        <div className="emergent-glass-card p-3.5 flex items-center justify-between border-amber-500/30">
+          <span className="text-xs text-status-low flex items-center gap-1.5 font-medium">
             <AlertTriangle className="w-3.5 h-3.5" /> Medium Risks
           </span>
-          <span className="text-base font-bold font-mono text-amber-300">{counts.medium}</span>
+          <span className="text-base font-bold font-mono text-status-low">{counts.medium}</span>
         </div>
-        <div className="rounded-xl border border-purple-900/40 bg-purple-950/20 p-3 flex items-center justify-between">
-          <span className="text-xs text-purple-400 flex items-center gap-1">
-            <Info className="w-3.5 h-3.5" /> Low Advisory
+        <div className="emergent-glass-card p-3.5 flex items-center justify-between border-emergent-cyan/30">
+          <span className="text-xs text-emergent-cyan flex items-center gap-1.5 font-medium">
+            <Info className="w-3.5 h-3.5" /> Advisory
           </span>
-          <span className="text-base font-bold font-mono text-purple-300">{counts.low}</span>
+          <span className="text-base font-bold font-mono text-emergent-cyan">{counts.low}</span>
         </div>
       </div>
 
       {/* 2. Filter & Search Controls */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-surface p-3 rounded-2xl border border-surface-border">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-surface p-2.5 rounded-2xl border border-surface-border">
         {/* Search Input */}
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3.5 top-2.5 h-4 w-4 text-gray-400" />
@@ -204,7 +204,7 @@ export const AlertsView: React.FC<AlertsViewProps> = ({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search anomalies (e.g. bat wings, 3x, drop)..."
-            className="w-full rounded-xl border border-surface-border bg-surface-subtle py-2 pl-10 pr-4 text-xs text-white placeholder-gray-500 focus:border-accent focus:outline-none"
+            className="w-full rounded-xl border border-surface-border bg-surface-subtle py-2 pl-10 pr-4 text-xs text-white placeholder-gray-500 focus:border-white/30 focus:outline-none"
           />
         </div>
 
@@ -219,10 +219,10 @@ export const AlertsView: React.FC<AlertsViewProps> = ({
             <button
               key={pill.id}
               onClick={() => setSeverityFilter(pill.id)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
                 severityFilter === pill.id
-                  ? 'bg-accent/20 text-accent-light border border-accent/40 shadow-sm'
-                  : 'bg-surface-subtle text-gray-400 hover:text-white border border-surface-border/60'
+                  ? 'bg-surface-elevated text-white border border-white/20 shadow-sm'
+                  : 'bg-surface-subtle text-gray-400 hover:text-white border border-surface-border'
               }`}
             >
               {pill.label}

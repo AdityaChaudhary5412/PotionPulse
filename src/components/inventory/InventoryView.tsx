@@ -91,28 +91,28 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
   return (
     <div className="space-y-6">
       {/* Top Header & Search Bar */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-surface-border pb-4">
         <div>
           <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            <Package className="w-5 h-5 text-accent" />
+            <Package className="w-5 h-5 text-emergent-cyan" />
             <span>Pantry Inventory Ledger</span>
           </h2>
           <p className="text-xs text-gray-400 mt-1">
-            Search, sort and manage stock levels, depletion forecasts, and supply safety margins.
+            Search, sort, and inspect reagent stocks, depletion runaways, and safety stock targets.
           </p>
         </div>
 
         <button
           onClick={onNewReagent}
-          className="flex items-center gap-1.5 rounded-xl bg-accent px-4 py-2 text-xs font-semibold text-white shadow-lg shadow-accent/25 hover:bg-accent-hover transition-all"
+          className="flex items-center gap-1.5 rounded-xl bg-white text-black px-4 py-2 text-xs font-bold shadow-sm hover:bg-gray-100 transition-all active:scale-95"
         >
-          <Plus className="w-4 h-4" />
-          <span>New Reagent</span>
+          <Plus className="w-4 h-4 text-black" />
+          <span>Add Reagent</span>
         </button>
       </div>
 
       {/* Filter & Search Bar */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-surface p-3 rounded-2xl border border-surface-border">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-surface p-2.5 rounded-2xl border border-surface-border">
         {/* Search Input */}
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3.5 top-2.5 h-4 w-4 text-gray-400" />
@@ -120,18 +120,18 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by reagent name or unit..."
-            className="w-full rounded-xl border border-surface-border bg-surface-subtle py-2 pl-10 pr-4 text-xs text-white placeholder-gray-500 focus:border-accent focus:outline-none"
+            placeholder="Search reagents or units..."
+            className="w-full rounded-xl border border-surface-border bg-surface-subtle py-2 pl-10 pr-4 text-xs text-white placeholder-gray-500 focus:border-white/30 focus:outline-none"
           />
         </div>
 
         {/* Status Filter Pills */}
         <div className="flex items-center gap-1 overflow-x-auto text-xs no-scrollbar">
           {[
-            { id: 'all', label: 'All Items' },
-            { id: 'safe', label: 'Safe', color: 'text-emerald-400' },
-            { id: 'low', label: 'Low Stock', color: 'text-amber-400' },
-            { id: 'critical', label: 'Critical', color: 'text-rose-400' },
+            { id: 'all', label: 'All Shelves' },
+            { id: 'safe', label: 'Safe', color: 'text-status-safe' },
+            { id: 'low', label: 'Low Stock', color: 'text-status-low' },
+            { id: 'critical', label: 'Critical', color: 'text-status-critical' },
           ].map((pill) => {
             const isSelected = statusFilter === pill.id;
             return (
@@ -140,7 +140,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
                 onClick={() => setStatusFilter(pill.id)}
                 className={`px-3 py-1.5 rounded-xl font-medium whitespace-nowrap transition-all ${
                   isSelected
-                    ? 'bg-accent/20 text-accent-light border border-accent/40 shadow-sm'
+                    ? 'bg-surface-elevated text-white border border-white/20 shadow-sm'
                     : 'text-gray-400 hover:text-white hover:bg-surface-subtle'
                 }`}
               >
@@ -168,10 +168,10 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
           onAction={search ? () => setSearch('') : onRefresh}
         />
       ) : (
-        <div className="overflow-hidden rounded-2xl border border-surface-border bg-surface shadow-sm">
+        <div className="overflow-hidden rounded-2xl border border-surface-border emergent-glass-card shadow-sm">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="border-b border-surface-border bg-surface-subtle text-gray-400 uppercase tracking-wider text-[10px]">
+              <thead className="border-b border-surface-border bg-surface-subtle/80 text-gray-400 uppercase tracking-wider text-[10px]">
                 <tr>
                   <th
                     onClick={() => handleSort('ingredient')}

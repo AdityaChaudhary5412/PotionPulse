@@ -7,14 +7,14 @@ interface LoadingStateProps {
 }
 
 export const LoadingState: React.FC<LoadingStateProps> = ({
-  message = 'Consulting the grimoire & prophecy engine...',
+  message = 'Forecasting depletion and assembling telemetry...',
   cardCount = 4
 }) => {
   return (
     <div className="w-full py-8 space-y-6 animate-pulse">
       {/* Loading message */}
-      <div className="flex items-center justify-center gap-2 text-sm text-purple-300 font-medium">
-        <Sparkles className="w-4 h-4 animate-spin text-accent" />
+      <div className="flex items-center justify-center gap-2 text-xs font-mono text-emergent-cyan font-medium">
+        <Sparkles className="w-3.5 h-3.5 animate-spin text-emergent-cyan" />
         <span>{message}</span>
       </div>
 
@@ -23,7 +23,7 @@ export const LoadingState: React.FC<LoadingStateProps> = ({
         {Array.from({ length: cardCount }).map((_, i) => (
           <div
             key={i}
-            className="rounded-2xl border border-surface-border bg-surface p-5 space-y-4"
+            className="emergent-glass-card p-5 space-y-4"
           >
             <div className="flex justify-between items-center">
               <div className="h-4 w-28 bg-surface-subtle rounded-md" />

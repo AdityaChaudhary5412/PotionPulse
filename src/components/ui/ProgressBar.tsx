@@ -18,15 +18,15 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
 }) => {
   const percentage = Math.min(100, Math.max(0, Math.round((value / Math.max(1, max)) * 100)));
 
-  // Color mapping based on status
-  let barColor = 'bg-emerald-500';
-  let glowColor = 'shadow-emerald-500/20';
+  // Emergent Color mapping based on status
+  let barColor = 'bg-status-safe';
+  let glowColor = 'shadow-emergent-glow-green';
   if (status === 'critical') {
-    barColor = 'bg-rose-500';
-    glowColor = 'shadow-rose-500/30';
+    barColor = 'bg-status-critical';
+    glowColor = 'shadow-sm shadow-red-500/50';
   } else if (status === 'low') {
-    barColor = 'bg-amber-500';
-    glowColor = 'shadow-amber-500/25';
+    barColor = 'bg-status-low';
+    glowColor = 'shadow-sm shadow-amber-500/50';
   }
 
   return (

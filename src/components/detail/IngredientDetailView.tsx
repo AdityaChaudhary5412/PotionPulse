@@ -291,29 +291,28 @@ export const IngredientDetailView: React.FC<IngredientDetailViewProps> = ({
                 margin={{ top: 20, right: 12, left: 0, bottom: 20 }}
               >
                 <defs>
-                  {/* Purple Gradient for Active Forecast Band */}
+                  {/* Emergent Neon Green Gradient for Active Forecast Band */}
                   <linearGradient id="activeBandGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.35} />
-                    <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0.03} />
+                    <stop offset="5%" stopColor="#81FF89" stopOpacity={0.30} />
+                    <stop offset="95%" stopColor="#81FF89" stopOpacity={0.02} />
                   </linearGradient>
 
-                  {/* Cyan Gradient for Baseline Forecast Band */}
+                  {/* Emergent Cobalt Blue Gradient for Baseline Forecast Band */}
                   <linearGradient id="baselineBandGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.25} />
-                    <stop offset="95%" stopColor="#06b6d4" stopOpacity={0.02} />
+                    <stop offset="5%" stopColor="#1759FF" stopOpacity={0.25} />
+                    <stop offset="95%" stopColor="#1759FF" stopOpacity={0.02} />
                   </linearGradient>
                 </defs>
 
-                <CartesianGrid strokeDasharray="3 3" stroke="#262d3d" vertical={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#27272e" vertical={false} />
 
                 {/* X-AXIS WITH LABEL */}
                 <XAxis
                   dataKey="date"
-                  stroke="#6b7280"
+                  stroke="#71717a"
                   fontSize={10}
                   tickMargin={8}
                   tickFormatter={(val: string) => {
-                    // Show MM-DD for compact phone screen readability
                     const parts = val.split('-');
                     return parts.length >= 3 ? `${parts[1]}/${parts[2]}` : val;
                   }}
@@ -321,14 +320,14 @@ export const IngredientDetailView: React.FC<IngredientDetailViewProps> = ({
                     value: 'Timeline Date',
                     position: 'insideBottom',
                     offset: -12,
-                    fill: '#9ca3af',
+                    fill: '#a1a1aa',
                     fontSize: 10
                   }}
                 />
 
                 {/* Y-AXIS WITH EXPLICIT UNITS */}
                 <YAxis
-                  stroke="#6b7280"
+                  stroke="#71717a"
                   fontSize={10}
                   tickMargin={4}
                   label={{
@@ -336,17 +335,17 @@ export const IngredientDetailView: React.FC<IngredientDetailViewProps> = ({
                     angle: -90,
                     position: 'insideLeft',
                     offset: 10,
-                    fill: '#9ca3af',
+                    fill: '#a1a1aa',
                     fontSize: 10
                   }}
                 />
 
-                {/* CUSTOM DARK THEME TOOLTIP */}
+                {/* CUSTOM EMERGENT DARK GLASS TOOLTIP */}
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: '#141721',
-                    borderColor: '#262d3d',
-                    borderRadius: '1rem',
+                    backgroundColor: '#141417',
+                    borderColor: '#27272e',
+                    borderRadius: '20px',
                     color: '#fff',
                     fontSize: '11px',
                     boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.7)'
@@ -355,26 +354,26 @@ export const IngredientDetailView: React.FC<IngredientDetailViewProps> = ({
                     if (value === null || value === undefined) return ['--', name];
                     const num = Number(value).toFixed(1);
                     if (name === 'actual') return [`${num} ${unit}`, 'Historical Sales'];
-                    if (name === 'forecast') return [`${num} ${unit}`, 'Event Forecast'];
+                    if (name === 'forecast') return [`${num} ${unit}`, 'Surge Forecast'];
                     if (name === 'forecast_baseline') return [`${num} ${unit}`, 'Baseline Forecast'];
                     if (name === 'hi') return [`${num} ${unit}`, 'Upper 95% Band'];
                     if (name === 'lo') return [`${num} ${unit}`, 'Lower 95% Band'];
                     return [`${num} ${unit}`, name];
                   }}
-                  labelFormatter={(lbl) => `Timeline Date: ${lbl}`}
+                  labelFormatter={(lbl) => `Date: ${lbl}`}
                 />
 
                 {/* VERTICAL "FORECAST STARTS HERE" REFERENCE LINE */}
                 {splitDate && (
                   <ReferenceLine
                     x={splitDate}
-                    stroke="#f59e0b"
+                    stroke="#FFB340"
                     strokeDasharray="4 4"
                     strokeWidth={2}
                     label={{
                       value: 'Forecast Starts Here',
                       position: 'top',
-                      fill: '#fbbf24',
+                      fill: '#FFB340',
                       fontSize: 10,
                       fontWeight: 600
                     }}
@@ -396,7 +395,7 @@ export const IngredientDetailView: React.FC<IngredientDetailViewProps> = ({
                       type="monotone"
                       dataKey="lo"
                       stroke="transparent"
-                      fill="#141721"
+                      fill="#141417"
                       name="lo"
                       isAnimationActive={false}
                     />
@@ -417,48 +416,48 @@ export const IngredientDetailView: React.FC<IngredientDetailViewProps> = ({
                       type="monotone"
                       dataKey="lo_baseline"
                       stroke="transparent"
-                      fill="#141721"
+                      fill="#141417"
                       name="lo_baseline"
                       isAnimationActive={false}
                     />
                   </>
                 )}
 
-                {/* 1. ACTUAL SALES HISTORY LINE */}
+                {/* 1. ACTUAL SALES HISTORY LINE (EMERGENT CYAN) */}
                 <Line
                   type="monotone"
                   dataKey="actual"
-                  stroke="#a78bfa"
+                  stroke="#80FFF9"
                   strokeWidth={2.5}
-                  dot={{ fill: '#a78bfa', r: 3 }}
-                  activeDot={{ r: 5, fill: '#c4b5fd' }}
+                  dot={{ fill: '#80FFF9', r: 3 }}
+                  activeDot={{ r: 5, fill: '#ffffff' }}
                   name="actual"
                   connectNulls={false}
                 />
 
-                {/* 2. FORECAST WITH EVENT (PURPLE/ROSE) */}
+                {/* 2. FORECAST WITH EVENT (EMERGENT NEON GREEN) */}
                 {(overlayMode === 'with_event' || overlayMode === 'both') && (
                   <Line
                     type="monotone"
                     dataKey="forecast"
-                    stroke="#a855f7"
+                    stroke="#81FF89"
                     strokeDasharray="5 5"
                     strokeWidth={2.5}
-                    dot={{ fill: '#a855f7', r: 3.5 }}
+                    dot={{ fill: '#81FF89', r: 3.5 }}
                     name="forecast"
                     connectNulls={false}
                   />
                 )}
 
-                {/* 3. BASELINE FORECAST WITHOUT EVENT (CYAN) */}
+                {/* 3. BASELINE FORECAST WITHOUT EVENT (EMERGENT BLUE) */}
                 {(overlayMode === 'without_event' || overlayMode === 'both') && (
                   <Line
                     type="monotone"
                     dataKey="forecast_baseline"
-                    stroke="#06b6d4"
+                    stroke="#1759FF"
                     strokeDasharray="3 3"
                     strokeWidth={2}
-                    dot={{ fill: '#06b6d4', r: 3 }}
+                    dot={{ fill: '#1759FF', r: 3 }}
                     name="forecast_baseline"
                     connectNulls={false}
                   />

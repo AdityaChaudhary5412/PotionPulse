@@ -53,18 +53,18 @@ export const AddStockDialog: React.FC<AddStockDialogProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-      <div className="w-full max-w-md rounded-2xl border border-surface-border bg-surface p-6 shadow-2xl space-y-5">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-in fade-in duration-200">
+      <div className="w-full max-w-md emergent-glass-card bg-surface/95 backdrop-blur-2xl p-6 shadow-2xl space-y-5 rounded-emergent-lg border border-white/10">
         {/* Header */}
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-950/60 border border-emerald-800/40 text-emerald-400">
-              <PackagePlus className="w-5 h-5" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-status-safe-bg border border-status-safe-border text-status-safe">
+              <PackagePlus className="w-5 h-5 text-status-safe" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-white">Add Stock (Restock)</h3>
+              <h3 className="text-base font-bold text-white tracking-tight">Add Stock (Restock)</h3>
               <p className="text-xs text-gray-400">
-                Replenish inventory for <strong className="text-emerald-400">{item.ingredient}</strong>
+                Replenish inventory for <strong className="text-status-safe">{item.ingredient}</strong>
               </p>
             </div>
           </div>
@@ -77,7 +77,7 @@ export const AddStockDialog: React.FC<AddStockDialogProps> = ({
         </div>
 
         {/* Current status pill */}
-        <div className="rounded-xl bg-surface-subtle p-3 flex justify-between items-center text-xs">
+        <div className="rounded-xl bg-surface-subtle p-3 flex justify-between items-center text-xs border border-surface-border">
           <span className="text-gray-400">Current On-Hand:</span>
           <span className="font-mono font-bold text-white">
             {item.stock} {item.unit}
@@ -88,7 +88,7 @@ export const AddStockDialog: React.FC<AddStockDialogProps> = ({
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-xs font-semibold text-gray-300">
-              Quantity to Add ({item.unit}) <span className="text-rose-400">*</span>:
+              Quantity to Add ({item.unit}) <span className="text-status-critical">*</span>:
             </label>
             <input
               type="number"
@@ -101,10 +101,10 @@ export const AddStockDialog: React.FC<AddStockDialogProps> = ({
                 setValidationError(null);
               }}
               placeholder={`Recommended: +${item.reorder_qty || 10}`}
-              className="mt-1.5 w-full rounded-xl border border-surface-border bg-surface-subtle p-3 text-sm text-white placeholder-gray-500 focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+              className="mt-1.5 w-full rounded-xl border border-surface-border bg-surface-subtle p-3 text-sm text-white placeholder-gray-500 focus:border-white/30 focus:outline-none"
             />
             {validationError && (
-              <p className="mt-1 text-xs text-rose-400 font-medium">{validationError}</p>
+              <p className="mt-1 text-xs text-status-critical font-medium">{validationError}</p>
             )}
           </div>
 
@@ -117,26 +117,26 @@ export const AddStockDialog: React.FC<AddStockDialogProps> = ({
               value={note}
               onChange={(e) => setNote(e.target.value)}
               placeholder="e.g. Goblin Caravan Delivery, Full Moon harvest"
-              className="mt-1.5 w-full rounded-xl border border-surface-border bg-surface-subtle p-3 text-sm text-white placeholder-gray-500 focus:border-accent focus:outline-none"
+              className="mt-1.5 w-full rounded-xl border border-surface-border bg-surface-subtle p-3 text-sm text-white placeholder-gray-500 focus:border-white/30 focus:outline-none"
             />
           </div>
 
           {/* Action buttons */}
-          <div className="flex justify-end gap-2.5 pt-3 border-t border-surface-border/60">
+          <div className="flex justify-end gap-2.5 pt-3 border-t border-surface-border">
             <button
               type="button"
               disabled={submitting}
               onClick={onClose}
-              className="rounded-xl border border-surface-border bg-surface-subtle px-4 py-2.5 text-xs font-semibold text-gray-300 hover:bg-surface-border transition-colors disabled:opacity-50"
+              className="rounded-xl px-4 py-2.5 text-xs font-semibold text-gray-300 hover:bg-surface-subtle transition-colors disabled:opacity-50"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={submitting}
-              className="flex items-center gap-1.5 rounded-xl bg-emerald-600 px-5 py-2.5 text-xs font-semibold text-white shadow-lg shadow-emerald-950/40 hover:bg-emerald-500 transition-all disabled:opacity-50"
+              className="flex items-center gap-1.5 rounded-xl bg-white text-black px-5 py-2.5 text-xs font-bold shadow-sm hover:bg-gray-100 transition-all active:scale-95 disabled:opacity-50"
             >
-              <ArrowUpRight className="w-4 h-4" />
+              <ArrowUpRight className="w-4 h-4 text-black" />
               <span>{submitting ? 'Adding...' : 'Confirm Restock'}</span>
             </button>
           </div>
