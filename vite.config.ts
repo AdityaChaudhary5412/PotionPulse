@@ -25,6 +25,7 @@ export default defineConfig({
       '/events': 'http://127.0.0.1:8000',
       '/alerts': 'http://127.0.0.1:8000',
       '/seed': 'http://127.0.0.1:8000',
+      '/agent': 'http://127.0.0.1:8000',
     },
   },
 })

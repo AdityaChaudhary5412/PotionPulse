@@ -22,13 +22,19 @@ import {
   AgentCommandResponse
 } from '../types';
 
-// Default to localhost:8000 or custom environment variable
-const API_BASE_URL = import.meta.env.VITE_API_URL !== undefined && import.meta.env.VITE_API_URL !== ''
-  ? import.meta.env.VITE_API_URL
-  : 'http://localhost:8000';
+// Dynamic API Base URL resolution for seamless full-stack integration:
+// 1. Explicit VITE_API_URL if defined in environment
+// 2. In Capacitor mobile container, fallback to emulator loopback or localhost:8000
+// 3. In web browser, use relative paths ('') so requests work identically on Vite (port 3000) and FastAPI (port 8000)
+const isCapacitor = typeof window !== 'undefined' && (window.location.protocol === 'capacitor:' || window.location.protocol === 'file:');
+
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL !== undefined && import.meta.env.VITE_API_URL !== ''
+    ? import.meta.env.VITE_API_URL
+    : (isCapacitor ? 'http://10.0.2.2:8000' : '');
 
 const client = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: API_BASE_URL || undefined,
   headers: {
     'Content-Type': 'application/json',
   },

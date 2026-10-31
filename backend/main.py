@@ -1,4 +1,6 @@
 from fastapi import FastAPI, HTTPException, Depends, status, UploadFile, File, Response
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
@@ -843,5 +845,39 @@ def agent_command_endpoint(payload: AgentCommandRequest, db: Session = Depends(g
     engine = EmergentAgentEngine(db)
     result = engine.execute(payload.prompt)
     return AgentCommandResponse(**result)
+
+
+# ==============================================================================
+# 10. FRONTEND SPA INTEGRATION (SERVE REACT FROM FASTAPI)
+# ==============================================================================
+dist_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "dist")
+if not os.path.exists(dist_dir):
+    dist_dir = "dist"
+
+if os.path.exists(dist_dir):
+    assets_dir = os.path.join(dist_dir, "assets")
+    if os.path.exists(assets_dir):
+        app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
+
+    @app.get("/{full_path:path}", include_in_schema=False)
+    def serve_spa(full_path: str):
+        # Allow FastAPI API routes, swagger docs, and openapi schema through
+        api_prefixes = (
+            "health", "ingredients", "sales", "movements", "upload", "predict",
+            "restock", "summary", "demand", "events", "alerts", "seed", "agent",
+            "docs", "openapi.json", "redoc"
+        )
+        if any(full_path == p or full_path.startswith(f"{p}/") for p in api_prefixes):
+            raise HTTPException(status_code=404, detail="API endpoint not found")
+
+        static_file = os.path.join(dist_dir, full_path)
+        if os.path.exists(static_file) and os.path.isfile(static_file):
+            return FileResponse(static_file)
+
+        index_html = os.path.join(dist_dir, "index.html")
+        if os.path.exists(index_html):
+            return FileResponse(index_html)
+        raise HTTPException(status_code=404, detail="Frontend assets not compiled")
+
 
 
