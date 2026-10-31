@@ -68,3 +68,4 @@ def test_agent_audit_and_forecast():
     forecast_data = res_forecast.json()
     assert forecast_data["success"] is True
     assert forecast_data["intent"] == "forecast"
+

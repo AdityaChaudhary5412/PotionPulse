@@ -44,6 +44,7 @@ android/local.properties
 .DS_Store
 
 # IDE / Editor
+*.log
 .vscode/
 .idea/
 *.swp
