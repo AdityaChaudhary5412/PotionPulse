@@ -68,3 +68,4 @@ export const BottomNav: React.FC<BottomNavProps> = ({
 };
 
 export default BottomNav;
+

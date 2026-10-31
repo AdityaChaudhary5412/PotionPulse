@@ -22,7 +22,11 @@ from backend.schemas import (
 )
 from backend import crud
 from backend.seed import seed_database
-from backend.data_cleaner import resolve_column, COLUMN_ALIASES, load_and_clean
+from backend.data_cleaner import (
+    resolve_column, COLUMN_ALIASES, load_and_clean,
+    parse_flexible_dates, sanitize_quantities,
+    compute_prediction_for_ingredient, SAFE_DEFAULT_BURN_RATES
+)
 
 try:
     from restock import (
@@ -329,16 +333,17 @@ async def upload_sales_csv(file: UploadFile = File(...), db: Session = Depends(g
 
             clean_name = raw_name.title()
 
-            # 2. Validate Date
+            # 2. Validate Date using flexible multi-format parser
             raw_date_val = row[date_col]
-            parsed_date = pd.to_datetime(raw_date_val, errors="coerce")
-            if pd.isna(parsed_date):
+            parsed_series = parse_flexible_dates(pd.Series([raw_date_val]))
+            if parsed_series.isna().all():
                 rejected.append({
                     "row": row_num,
                     "data": raw_dict,
                     "reason": f"Invalid date value: '{raw_date_val}' could not be parsed."
                 })
                 continue
+            parsed_date = parsed_series.iloc[0]
 
             # 3. Validate Quantity
             raw_qty_val = row[qty_col]
@@ -361,6 +366,10 @@ async def upload_sales_csv(file: UploadFile = File(...), db: Session = Depends(g
                     "reason": "Quantity is 0.0; no inventory movement to log."
                 })
                 continue
+
+            # Clip extreme values/typos to safe maximum threshold
+            if abs(qty_float) > 10000.0:
+                qty_float = 10000.0 if qty_float > 0 else -10000.0
 
             # Determine movement type
             raw_type = str(row[type_col]).strip().lower() if (type_col and pd.notna(row[type_col])) else ""
@@ -387,10 +396,17 @@ async def upload_sales_csv(file: UploadFile = File(...), db: Session = Depends(g
             target_ing = ingredients_cache[clean_name]
             target_ing.current_stock = max(0.0, target_ing.current_stock + delta_stock)
 
-            # Record Movement
+            # Record Movement with robust datetime conversion
+            if hasattr(parsed_date, "to_pydatetime"):
+                mv_ts = parsed_date.to_pydatetime()
+            elif isinstance(parsed_date, datetime):
+                mv_ts = parsed_date
+            else:
+                mv_ts = datetime.combine(parsed_date, datetime.min.time())
+
             mv = Movement(
                 ingredient_id=target_ing.id,
-                ts=parsed_date.to_pydatetime(),
+                ts=mv_ts,
                 type=mv_type,
                 qty=abs(qty_float),
                 note=f"Imported via CSV upload row #{row_num}"
@@ -483,20 +499,21 @@ async def predict_demand_csv(file: UploadFile = File(...)):
         # 3. Clean and prepare data
         df = raw_df.copy()
         df["clean_ingredient"] = df[item_col].astype(str).str.strip().str.title()
-        df = df[df["clean_ingredient"].str.lower() != "nan"]
-        df["clean_date"] = pd.to_datetime(df[date_col], errors="coerce").dt.date
+        df = df[~df["clean_ingredient"].str.lower().isin(["nan", "none", "null", ""])]
+
+        # Flexible date parsing across multiple formats (ISO, US, UK, timestamps)
+        df["clean_date"] = parse_flexible_dates(df[date_col])
         df = df.dropna(subset=["clean_date"])
 
-        df["clean_qty"] = pd.to_numeric(
-            df[qty_col].astype(str).str.replace(",", "").str.strip(), 
-            errors="coerce"
-        ).fillna(0.0)
+        # Sanitize numeric quantities and clip extreme outliers (> 10000)
+        df["clean_qty"] = sanitize_quantities(df[qty_col])
 
         if type_col:
             df["clean_type"] = df[type_col].astype(str).str.strip().str.lower()
             is_sale = df["clean_type"].str.contains("sale|dispense|out|consume") | (df["clean_qty"] < 0)
             df = df[is_sale]
         
+        # Sales are positive demand volume
         df["clean_qty"] = df["clean_qty"].abs()
 
         if df.empty:
@@ -505,10 +522,10 @@ async def predict_demand_csv(file: UploadFile = File(...)):
                 detail="No valid sales rows found after cleaning. Ensure transactions represent sales."
             )
 
-        # Deduplicate
+        # Deduplicate identical transaction rows
         df = df.drop_duplicates(subset=["clean_date", "clean_ingredient", "clean_qty"])
 
-        # 4. Aggregate daily sales and fill missing days with 0.0
+        # 4. Aggregate daily sales and fill missing calendar days with 0.0
         daily_sales = (
             df.groupby(["clean_date", "clean_ingredient"], as_index=False)["clean_qty"]
             .sum()
@@ -517,7 +534,7 @@ async def predict_demand_csv(file: UploadFile = File(...)):
         min_date = daily_sales["clean_date"].min()
         max_date = daily_sales["clean_date"].max()
         all_dates = pd.date_range(min_date, max_date, freq="D").date
-        all_ingredients = daily_sales["clean_ingredient"].unique()
+        all_ingredients = sorted(daily_sales["clean_ingredient"].unique())
 
         full_grid = pd.MultiIndex.from_product(
             [all_dates, all_ingredients], 
@@ -527,32 +544,49 @@ async def predict_demand_csv(file: UploadFile = File(...)):
         full_daily = pd.merge(full_grid, daily_sales, on=["clean_date", "clean_ingredient"], how="left")
         full_daily["clean_qty"] = full_daily["clean_qty"].fillna(0.0)
 
-        # 5. Compute 7-day Moving Average Prediction for next day
+        # 5. Deterministic next-day prediction with safe baseline fallback for sparse history
         output = io.StringIO()
         writer = csv.writer(output)
-        # Fixed output schema: ingredient,date,predicted_qty
+        # Strict Fixed output schema: ingredient,date,predicted_qty
         writer.writerow(["ingredient", "date", "predicted_qty"])
 
         next_date_str = (max_date + timedelta(days=1)).strftime("%Y-%m-%d")
+        fallback_notes = []
 
-        for ingredient in sorted(all_ingredients):
+        for ingredient in all_ingredients:
             ing_history = full_daily[full_daily["clean_ingredient"] == ingredient].sort_values("clean_date")
-            
-            # Take last 7 days of daily demand (including 0s)
-            recent_7_days = ing_history["clean_qty"].tail(7)
-            
-            # Calculate 7-day moving average
-            moving_avg = float(recent_7_days.mean()) if len(recent_7_days) > 0 else 0.0
-            predicted_qty = round(max(0.0, moving_avg), 2)
+            recent_series = ing_history["clean_qty"]
+
+            predicted_qty, explanation, is_fallback = compute_prediction_for_ingredient(
+                ingredient=ingredient,
+                recent_series=recent_series,
+                min_required_history=7
+            )
+
+            if is_fallback:
+                fallback_notes.append(f"{ingredient}: {explanation}")
 
             writer.writerow([ingredient, next_date_str, predicted_qty])
 
         csv_content = output.getvalue()
 
+        # Build response headers with fallback notices
+        headers = {
+            "Content-Disposition": "attachment; filename=predictions.csv",
+            "X-Prediction-Method": "7-day Moving Average with Safe Baseline Fallback",
+            "X-Total-Ingredients": str(len(all_ingredients)),
+            "X-Fallback-Count": str(len(fallback_notes))
+        }
+
+        if fallback_notes:
+            headers["X-Prediction-Fallback"] = "true"
+            headers["X-Fallback-Notice"] = f"{len(fallback_notes)} ingredients had insufficient history (< 7 days) and fell back to safe baselines."
+            headers["X-Fallback-Details"] = "; ".join(fallback_notes[:5])
+
         return Response(
             content=csv_content,
             media_type="text/csv",
-            headers={"Content-Disposition": "attachment; filename=predictions.csv"}
+            headers=headers
         )
 
     except HTTPException:

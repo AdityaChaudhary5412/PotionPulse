@@ -15,3 +15,4 @@ services:
         value: "*"
       # For SQLite on Render: leave DATABASE_URL unset (defaults to sqlite:///./potion_pulse.db)
       # Or attach Render Postgres and Render automatically populates DATABASE_URL!
+
