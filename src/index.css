@@ -22,17 +22,20 @@
   }
 }
 
-/* Emergent Glass Specular Top Border utility */
+/* Emergent Glass Specular Top Border utility with Mystical Apothecary Frosted Glass */
 .emergent-glass-card {
-  background: #141417;
+  background: rgba(18, 16, 26, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  box-shadow: 0 4px 24px -2px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .emergent-glass-card:hover {
-  border-color: rgba(255, 255, 255, 0.14);
+  border-color: rgba(168, 85, 247, 0.25);
+  box-shadow: 0 8px 30px -4px rgba(0, 0, 0, 0.6), 0 0 20px -2px rgba(168, 85, 247, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 
 /* Custom subtle dark scrollbar */

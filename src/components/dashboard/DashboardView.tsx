@@ -56,11 +56,11 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       {/* Top Four Stat Cards */}
       <StatCards summary={summary} loading={loading && !summary} />
 
-      {/* Emergent Shelves Toolbar */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-surface-border pb-4">
+      {/* Sleek Apothecary Shelves Toolbar */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-white/[0.08] pb-4">
         <div>
           <h2 className="text-lg font-bold text-white flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-emergent-cyan" />
+            <Sparkles className="w-4 h-4 text-cyan-300" />
             <span>Pantry Shelves</span>
             <span className="text-xs font-mono text-gray-400 font-normal">
               ({processedItems.length} {processedItems.length === 1 ? 'reagent' : 'reagents'})
@@ -71,16 +71,16 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           </p>
         </div>
 
-        {/* Emergent Segmented Filter Control */}
-        <div className="flex items-center gap-1.5 flex-wrap">
-          <div className="flex items-center p-1 rounded-xl bg-surface-subtle border border-surface-border text-xs">
+        {/* Refined Segmented Filter Control */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center p-1 rounded-2xl bg-white/[0.03] border border-white/[0.08] text-xs">
             {['all', 'critical', 'low', 'safe'].map((st) => (
               <button
                 key={st}
                 onClick={() => setFilterStatus(st)}
-                className={`px-2.5 py-1 rounded-lg capitalize transition-all font-medium ${
+                className={`px-3 py-1.5 rounded-xl capitalize transition-all font-medium ${
                   filterStatus === st
-                    ? 'bg-surface text-white border border-white/10 shadow-sm'
+                    ? 'bg-purple-500/25 text-white border border-purple-400/40 shadow-sm font-semibold'
                     : 'text-gray-400 hover:text-gray-200'
                 }`}
               >
@@ -92,10 +92,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           {/* Sort Switcher */}
           <button
             onClick={() => setSortBy((prev) => (prev === 'urgent' ? 'alphabetical' : prev === 'alphabetical' ? 'stock' : 'urgent'))}
-            className="flex items-center gap-1.5 text-xs text-gray-300 bg-surface-subtle hover:bg-surface px-3 py-1.5 rounded-xl border border-surface-border hover:border-white/20 transition-all"
+            className="flex items-center gap-1.5 text-xs text-gray-300 bg-white/[0.04] hover:bg-white/[0.08] px-3.5 py-2 rounded-2xl border border-white/[0.08] hover:border-white/20 transition-all font-medium"
             title="Toggle sort order"
           >
-            <ArrowUpDown className="w-3.5 h-3.5 text-emergent-cyan" />
+            <ArrowUpDown className="w-3.5 h-3.5 text-cyan-400" />
             <span className="capitalize">{sortBy} First</span>
           </button>
         </div>

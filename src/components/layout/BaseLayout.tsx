@@ -89,17 +89,17 @@ export const BaseLayout: React.FC<BaseLayoutProps> = ({
 
       <div className="flex-1 flex w-full mx-auto max-w-7xl">
         {/* ============================================================== */}
-        {/* EMERGENT DESKTOP SIDEBAR (Visible on md: and larger screens)     */}
+        {/* REFINED APOTHECARY SIDEBAR (Visible on md: and larger screens)   */}
         {/* ============================================================== */}
         {onTabChange && (
-          <aside className="hidden md:flex flex-col w-64 border-r border-surface-border bg-background/50 p-4 shrink-0 space-y-6 sticky top-16 h-[calc(100vh-4rem)]">
+          <aside className="hidden md:flex flex-col w-64 border-r border-white/[0.06] bg-[#0c0a14]/60 p-4 shrink-0 space-y-6 sticky top-16 h-[calc(100vh-4rem)] backdrop-blur-xl">
             {/* Workspace & Mode Pill */}
-            <div className="px-2 py-1.5 rounded-xl bg-surface-subtle/80 border border-surface-border flex items-center justify-between text-xs">
+            <div className="px-3 py-2 rounded-2xl bg-white/[0.03] border border-white/[0.08] flex items-center justify-between text-xs shadow-sm">
               <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-emergent-green animate-pulse" />
+                <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_6px_#34d399]" />
                 <span className="font-semibold text-gray-200">Active Pantry</span>
               </div>
-              <span className="font-mono text-[10px] text-emergent-cyan bg-emergent-cyan/10 px-1.5 py-0.5 rounded border border-emergent-cyan/20">
+              <span className="font-mono text-[10px] text-cyan-300 bg-cyan-500/10 px-2 py-0.5 rounded-full border border-cyan-500/20">
                 LightGBM v2
               </span>
             </div>
@@ -116,16 +116,16 @@ export const BaseLayout: React.FC<BaseLayoutProps> = ({
                   <button
                     key={item.id}
                     onClick={() => onTabChange(item.id)}
-                    className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium transition-all group ${
+                    className={`w-full flex items-center justify-between px-3 py-2.5 rounded-2xl text-xs font-medium transition-all group ${
                       isActive
-                        ? 'bg-surface-elevated text-white border border-white/15 shadow-sm shadow-black/40'
-                        : 'text-gray-400 hover:text-white hover:bg-surface-subtle'
+                        ? 'bg-gradient-to-r from-purple-500/15 via-white/[0.08] to-transparent text-white border border-purple-500/30 shadow-[0_0_15px_rgba(168,85,247,0.15)] font-semibold'
+                        : 'text-gray-400 hover:text-white hover:bg-white/[0.04]'
                     }`}
                   >
                     <div className="flex items-center gap-2.5">
-                      <div className={`p-1.5 rounded-lg transition-colors ${
+                      <div className={`p-1.5 rounded-xl transition-colors ${
                         isActive
-                          ? 'bg-emergent-cyan/15 text-emergent-cyan'
+                          ? 'bg-purple-500/20 text-purple-300 shadow-[0_0_8px_rgba(168,85,247,0.3)]'
                           : 'text-gray-400 group-hover:text-gray-200'
                       }`}>
                         <Icon className="w-4 h-4" />
@@ -138,7 +138,7 @@ export const BaseLayout: React.FC<BaseLayoutProps> = ({
                     </div>
 
                     {item.badge !== undefined && (
-                      <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-red-500/20 text-red-400 border border-red-500/30">
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-500/20 text-red-400 border border-red-500/30">
                         {item.badge}
                       </span>
                     )}
@@ -147,43 +147,30 @@ export const BaseLayout: React.FC<BaseLayoutProps> = ({
               })}
             </div>
 
-            {/* Emergent Curse / Surge Controller Card in Sidebar */}
-            <div className="mt-auto pt-4 border-t border-surface-border">
+            {/* Clean Telemetry Status Indicator (Non-cluttered) */}
+            <div className="mt-auto pt-4 border-t border-white/[0.08]">
               <div className={`p-3 rounded-2xl border transition-all ${
                 isCurseMode
-                  ? 'border-red-500/40 bg-red-950/20'
-                  : 'border-surface-border bg-surface/60'
+                  ? 'border-red-500/30 bg-red-950/20 shadow-[0_0_12px_rgba(239,68,68,0.15)]'
+                  : 'border-white/[0.06] bg-white/[0.02]'
               }`}>
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-1.5">
-                    <Zap className={`w-3.5 h-3.5 ${isCurseMode ? 'text-red-400' : 'text-emergent-cyan'}`} />
-                    <span className="text-xs font-semibold text-white">Curse Stress Test</span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={toggleCurseMode}
-                    className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full transition-colors ${
-                      isCurseMode ? 'bg-red-500' : 'bg-surface-border'
-                    }`}
-                  >
-                    <span
-                      className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white transition duration-200 ${
-                        isCurseMode ? 'translate-x-4' : 'translate-x-0.5'
-                      }`}
-                    />
-                  </button>
+                <div className="flex items-center gap-2 mb-1">
+                  <div className={`w-2 h-2 rounded-full ${isCurseMode ? 'bg-red-400 animate-ping' : 'bg-emerald-400'}`} />
+                  <span className="text-xs font-semibold text-white">
+                    {isCurseMode ? 'Surge Mode Active' : 'Pantry State'}
+                  </span>
                 </div>
                 <p className="text-[11px] text-gray-400 leading-snug">
                   {isCurseMode
-                    ? `Surge active: +${curseMultiplier.toFixed(1)}x demand multiplier across recipes.`
-                    : 'Simulate high-impact surges & Halloween rush.'}
+                    ? `Demand shockwave at ${curseMultiplier.toFixed(1)}x. Recalculating days-to-stockout.`
+                    : 'Real-time telemetry tracking consumption & stockouts.'}
                 </p>
               </div>
 
               {/* System Footer Badge */}
               <div className="mt-4 px-2 flex items-center justify-between text-[11px] text-gray-500">
                 <span className="flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emergent-green" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_5px_#34d399]" />
                   Engine Online
                 </span>
                 <span className="font-mono text-[10px]">v2.0</span>

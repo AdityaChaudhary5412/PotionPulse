@@ -1,6 +1,7 @@
 import React from 'react';
 import { AnimatedShaderHero } from '../ui/animated-shader-hero';
 import BorderBeamSearch from '../ui/border-beam-search';
+import PotionPulseLogo from '../ui/PotionPulseLogo';
 import {
   Sparkles,
   Zap,
@@ -31,22 +32,8 @@ export const FrontPage: React.FC<FrontPageProps> = ({
     <div className="w-full bg-[#07050a] text-white selection:bg-orange-500/30 selection:text-white">
       {/* 1. Sleek Glass Top Navigation */}
       <nav className="absolute top-0 left-0 right-0 z-50 flex items-center justify-between px-6 sm:px-12 py-5 max-w-7xl mx-auto">
-        <div className="flex items-center gap-3">
-          <div className="relative flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-500/20 to-yellow-500/20 border border-orange-400/30 shadow-lg shadow-orange-950/40">
-            <Sparkles className="h-5 w-5 text-yellow-300" />
-            <div className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-emerald-400 ring-2 ring-black" />
-          </div>
-          <div className="flex flex-col">
-            <span className="font-sans text-base sm:text-lg font-black tracking-tight text-white flex items-center gap-2">
-              PotionPulse
-              <span className="text-[10px] font-mono font-medium px-2 py-0.5 rounded-full bg-orange-500/10 border border-orange-400/20 text-orange-200">
-                2.0
-              </span>
-            </span>
-            <span className="text-[11px] text-gray-400 hidden sm:inline font-mono">
-              Autonomous Reagent Engine
-            </span>
-          </div>
+        <div className="flex items-center gap-3 cursor-pointer" onClick={onEnterApp}>
+          <PotionPulseLogo size="lg" subtitle="Autonomous Reagent Engine" />
         </div>
 
         <div className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-300">
