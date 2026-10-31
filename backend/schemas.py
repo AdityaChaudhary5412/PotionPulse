@@ -53,18 +53,54 @@ class StockChange(BaseModel):
     note: Optional[str] = "Supplier batch arrival"
 
 # Event & Alert Schemas
-class EventBase(BaseModel):
-    name: str = "Midnight Curse"
-    multiplier: float = 3.0
-    active: bool = False
+class EventCreate(BaseModel):
+    name: str = Field(..., example="Midnight Curse")
+    start_date: Optional[datetime] = Field(default=None, example="2026-10-31T00:00:00")
+    end_date: Optional[datetime] = Field(default=None, example="2026-11-03T00:00:00")
+    ingredient_ids: List[int] = Field(default_factory=list, example=[1, 4, 5])
+    multiplier: float = Field(default=3.0, gt=0.0, example=3.0)
+    active: bool = Field(default=True, example=True)
 
-class EventOut(EventBase):
+class EventOut(BaseModel):
     id: int
-    starts_at: datetime
-    ends_at: Optional[datetime] = None
+    name: str
+    start_date: Optional[datetime] = None
+    end_date: Optional[datetime] = None
+    ingredient_ids: List[int] = []
+    multiplier: float
+    active: bool
 
     class Config:
         from_attributes = True
+
+# Demand Chart Schemas
+class DemandHistoryPoint(BaseModel):
+    date: str
+    actual: float
+
+class DemandForecastPoint(BaseModel):
+    date: str
+    predicted_qty: float
+    lo: float
+    hi: float
+
+class DemandChartPoint(BaseModel):
+    date: str
+    actual: Optional[float] = None
+    forecast: Optional[float] = None
+    lo: Optional[float] = None
+    hi: Optional[float] = None
+
+class DemandResponse(BaseModel):
+    ingredient_id: int
+    ingredient: str
+    unit: str
+    current_stock: float
+    with_event: bool
+    active_multiplier: float
+    history: List[DemandHistoryPoint]
+    forecast: List[DemandForecastPoint]
+    chart_data: List[DemandChartPoint]
 
 class AlertOut(BaseModel):
     id: int
@@ -98,6 +134,7 @@ class RestockItem(BaseModel):
     safety_stock: Optional[float] = None
     lead_time_days: Optional[int] = None
     daily_demand: Optional[float] = None
+    active_multiplier: Optional[float] = 1.0
 
 class SummaryResponse(BaseModel):
     low_count: int

@@ -173,3 +173,4 @@ def test_get_alerts_api():
     assert "severity" in first
     assert "description" in first
     assert "ts" in first
+

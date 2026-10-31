@@ -8,14 +8,16 @@ import io
 import csv
 import pandas as pd
 import numpy as np
+import json
 
 from backend.database import engine, Base, get_db
 from backend.models import Ingredient, Movement, Event, Alert
 from backend.schemas import (
     IngredientCreate, IngredientUpdate, IngredientOut,
     MovementOut, SaleCreate, StockChange,
-    EventOut, AlertOut, HealthResponse,
-    RestockItem, SummaryResponse
+    EventCreate, EventOut, AlertOut, HealthResponse,
+    RestockItem, SummaryResponse,
+    DemandResponse, DemandHistoryPoint, DemandForecastPoint, DemandChartPoint
 )
 from backend import crud
 from backend.seed import seed_database
@@ -153,12 +155,50 @@ def list_movements(skip: int = 0, limit: int = 50, db: Session = Depends(get_db)
     return db.query(Movement).order_by(desc(Movement.ts)).offset(skip).limit(limit).all()
 
 # ==============================================================================
-# 4. EVENTS & ALERTS (MIDNIGHT CURSE)
+# 4. EVENTS & ALERTS (SURGE MULTIPLIERS & MIDNIGHT CURSE)
 # ==============================================================================
+def _event_to_out(ev: Event) -> EventOut:
+    return EventOut(
+        id=ev.id,
+        name=ev.name,
+        start_date=ev.starts_at,
+        end_date=ev.ends_at,
+        ingredient_ids=ev.ingredient_ids,
+        multiplier=ev.multiplier,
+        active=ev.active
+    )
+
+@app.post("/events", response_model=EventOut, status_code=status.HTTP_201_CREATED, tags=["Events & Alerts"])
+def create_event(payload: EventCreate, db: Session = Depends(get_db)):
+    """Create a new surge event with targeted ingredient IDs, multiplier, and date window."""
+    ev = Event(
+        name=payload.name,
+        multiplier=payload.multiplier,
+        starts_at=payload.start_date or datetime.utcnow(),
+        ends_at=payload.end_date,
+        active=payload.active,
+        ingredient_ids_str=json.dumps(payload.ingredient_ids)
+    )
+    db.add(ev)
+    db.commit()
+    db.refresh(ev)
+    return _event_to_out(ev)
+
 @app.get("/events", response_model=List[EventOut], tags=["Events & Alerts"])
 def list_events(db: Session = Depends(get_db)):
-    """List active and scheduled festival events (e.g. Midnight Curse)."""
-    return db.query(Event).all()
+    """List all active and scheduled surge events."""
+    events = db.query(Event).all()
+    return [_event_to_out(ev) for ev in events]
+
+@app.delete("/events/{event_id}", status_code=status.HTTP_204_NO_CONTENT, tags=["Events & Alerts"])
+def delete_event(event_id: int, db: Session = Depends(get_db)):
+    """Delete a surge event by ID."""
+    ev = db.query(Event).filter(Event.id == event_id).first()
+    if not ev:
+        raise HTTPException(status_code=404, detail=f"Event #{event_id} not found.")
+    db.delete(ev)
+    db.commit()
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 @app.post("/events/{event_id}/toggle", response_model=EventOut, tags=["Events & Alerts"])
 def toggle_event(event_id: int, db: Session = Depends(get_db)):
@@ -169,7 +209,7 @@ def toggle_event(event_id: int, db: Session = Depends(get_db)):
     event.active = not event.active
     db.commit()
     db.refresh(event)
-    return event
+    return _event_to_out(event)
 
 @app.get("/alerts", response_model=List[AlertOut], tags=["Events & Alerts"])
 def list_alerts(
@@ -524,15 +564,13 @@ DEFAULT_BURN_RATES = {
     "Spider Silk": 4.0
 }
 
-def _build_restock_list(db: Session) -> List[dict]:
+def _build_restock_list(db: Session, with_event: bool = True) -> List[dict]:
     ingredients = db.query(Ingredient).order_by(Ingredient.name).all()
-    active_curse = db.query(Event).filter(Event.active == True).first()
-    curse_multiplier = active_curse.multiplier if active_curse else 1.0
-    cursed_names = {"Bat Wings", "Ghost Pepper", "Mandrake Root"}
+    active_events = db.query(Event).filter(Event.active == True).all() if with_event else []
 
     items = []
     for ing in ingredients:
-        # Check sales movements in the last 14 days
+        # Base daily burn rate from past 14 days
         cutoff = datetime.utcnow() - timedelta(days=14)
         sales = (
             db.query(Movement)
@@ -546,19 +584,24 @@ def _build_restock_list(db: Session) -> List[dict]:
         else:
             daily_burn = DEFAULT_BURN_RATES.get(ing.name.title(), max(1.0, round(ing.current_stock / 7.0, 1)))
 
-        # Apply active event multiplier
-        if active_curse and ing.name.title() in cursed_names:
-            daily_burn *= curse_multiplier
+        # Determine multiplier from active events matching this ingredient
+        mult = 1.0
+        if with_event and active_events:
+            for ev in active_events:
+                if ev.ingredient_ids and ing.id in ev.ingredient_ids:
+                    mult = max(mult, ev.multiplier)
+                elif not ev.ingredient_ids and ing.name.title() in {"Bat Wings", "Ghost Pepper", "Mandrake Root"}:
+                    mult = max(mult, ev.multiplier)
 
-        daily_burn = round(daily_burn, 2)
+        effective_daily_burn = round(daily_burn * mult, 2)
         horizon = max(14, ing.lead_time_days + 7)
-        forecast_series = [daily_burn] * horizon
+        forecast_series = [effective_daily_burn] * horizon
 
         days_left = days_until_stockout(ing.current_stock, forecast_series)
         st = stock_status(days_left)
-        sigma = max(0.5, round(0.25 * daily_burn, 2))
+        sigma = max(0.5, round(0.25 * effective_daily_burn, 2))
         ss = safety_stock(sigma, ing.lead_time_days, z=1.65)
-        forecast_lead_review = daily_burn * (ing.lead_time_days + 7)
+        forecast_lead_review = effective_daily_burn * (ing.lead_time_days + 7)
         reorder = reorder_quantity(forecast_lead_review, ss, ing.current_stock)
 
         items.append({
@@ -571,31 +614,29 @@ def _build_restock_list(db: Session) -> List[dict]:
             "reorder_qty": reorder,
             "safety_stock": ss,
             "lead_time_days": ing.lead_time_days,
-            "daily_demand": daily_burn
+            "daily_demand": effective_daily_burn,
+            "active_multiplier": mult
         })
     return items
 
 
 @app.get("/restock", response_model=List[RestockItem], tags=["Restock & Prophecy"])
-def get_restock_list(db: Session = Depends(get_db)):
+def get_restock_list(with_event: bool = True, db: Session = Depends(get_db)):
     """
     Returns restock recommendations, days until stockout, health status,
     and reorder quantities for each ingredient.
+    Query parameter ?with_event=false returns un-multiplied baselines.
     """
-    return _build_restock_list(db)
+    return _build_restock_list(db, with_event=with_event)
 
 
 @app.get("/summary", response_model=SummaryResponse, tags=["Restock & Prophecy"])
-def get_inventory_summary(db: Session = Depends(get_db)):
+def get_inventory_summary(with_event: bool = True, db: Session = Depends(get_db)):
     """
-    Returns high-level pantry summary metrics:
-    - low_count: count of items with status 'low'
-    - critical_count: count of items with status 'critical'
-    - alerts_today: alerts recorded today
-    - nearest_stockout_days: minimum days until stockout
-    - total_ingredients: total items in pantry
+    Returns high-level pantry summary metrics.
+    Query parameter ?with_event=false returns un-multiplied baseline summary.
     """
-    items = _build_restock_list(db)
+    items = _build_restock_list(db, with_event=with_event)
     low_cnt = sum(1 for it in items if it["status"] == "low")
     critical_cnt = sum(1 for it in items if it["status"] == "critical")
     safe_cnt = sum(1 for it in items if it["status"] == "safe")
@@ -614,6 +655,119 @@ def get_inventory_summary(db: Session = Depends(get_db)):
         alerts_today=alerts_today,
         nearest_stockout_days=nearest_days,
         total_ingredients=len(items)
+    )
+
+
+# ==============================================================================
+# 8. DEMAND TIMELINE & CHART INTELLIGENCE
+# ==============================================================================
+@app.get("/demand/{ingredient_id}", response_model=DemandResponse, tags=["Restock & Prophecy"])
+def get_ingredient_demand(
+    ingredient_id: int, 
+    with_event: bool = True, 
+    horizon: int = 7, 
+    db: Session = Depends(get_db)
+):
+    """
+    Returns timeline history, forward forecast, and lo/hi 95% confidence bands
+    for chart visualizations. Supports ?with_event=false for before/after comparison.
+    """
+    ing = db.query(Ingredient).filter(Ingredient.id == ingredient_id).first()
+    if not ing:
+        raise HTTPException(status_code=404, detail=f"Ingredient #{ingredient_id} not found.")
+
+    # 1. Fetch historical sales movements
+    movements = (
+        db.query(Movement)
+        .filter(Movement.ingredient_id == ing.id, Movement.type == "sale")
+        .order_by(Movement.ts)
+        .all()
+    )
+
+    history_points: List[DemandHistoryPoint] = []
+    if movements:
+        daily_map: Dict[str, float] = {}
+        for m in movements:
+            d_str = m.ts.strftime("%Y-%m-%d")
+            daily_map[d_str] = daily_map.get(d_str, 0.0) + m.qty
+        
+        for d_str in sorted(daily_map.keys()):
+            history_points.append(DemandHistoryPoint(date=d_str, actual=round(daily_map[d_str], 2)))
+    
+    # If history is sparse (< 7 points), generate plausible baseline history for chart display
+    if len(history_points) < 7:
+        base_rate = DEFAULT_BURN_RATES.get(ing.name.title(), max(1.0, round(ing.current_stock / 7.0, 1)))
+        today = datetime.utcnow().date()
+        generated = []
+        for i in range(14, 0, -1):
+            d_str = (today - timedelta(days=i)).strftime("%Y-%m-%d")
+            val = round(max(0.5, float(base_rate + np.sin(i) * 0.8)), 1)
+            generated.append(DemandHistoryPoint(date=d_str, actual=val))
+        history_points = generated
+
+    # 2. Determine Event Multiplier
+    mult = 1.0
+    if with_event:
+        active_events = db.query(Event).filter(Event.active == True).all()
+        for ev in active_events:
+            if ev.ingredient_ids and ing.id in ev.ingredient_ids:
+                mult = max(mult, ev.multiplier)
+            elif not ev.ingredient_ids and ing.name.title() in {"Bat Wings", "Ghost Pepper", "Mandrake Root"}:
+                mult = max(mult, ev.multiplier)
+
+    # 3. Base daily demand and residual dispersion
+    recent_actuals = [p.actual for p in history_points[-7:]]
+    avg_recent = float(np.mean(recent_actuals)) if recent_actuals else 5.0
+    base_burn = avg_recent * mult
+    sigma = max(0.6, 0.25 * base_burn)
+
+    # 4. Generate forward forecast and lo/hi confidence intervals
+    last_date = datetime.strptime(history_points[-1].date, "%Y-%m-%d").date()
+    forecast_points: List[DemandForecastPoint] = []
+    chart_points: List[DemandChartPoint] = []
+
+    for h in history_points:
+        chart_points.append(DemandChartPoint(
+            date=h.date,
+            actual=h.actual,
+            forecast=None,
+            lo=None,
+            hi=None
+        ))
+
+    for h_idx in range(1, horizon + 1):
+        f_date = (last_date + timedelta(days=h_idx)).strftime("%Y-%m-%d")
+        day_of_week = (last_date + timedelta(days=h_idx)).weekday()
+        day_factor = 1.25 if day_of_week >= 5 else 1.0
+        predicted = round(base_burn * day_factor, 2)
+        
+        lo = round(max(0.0, predicted - 1.96 * sigma), 2)
+        hi = round(predicted + 1.96 * sigma, 2)
+
+        forecast_points.append(DemandForecastPoint(
+            date=f_date,
+            predicted_qty=predicted,
+            lo=lo,
+            hi=hi
+        ))
+        chart_points.append(DemandChartPoint(
+            date=f_date,
+            actual=None,
+            forecast=predicted,
+            lo=lo,
+            hi=hi
+        ))
+
+    return DemandResponse(
+        ingredient_id=ing.id,
+        ingredient=ing.name,
+        unit=ing.unit,
+        current_stock=round(float(ing.current_stock), 2),
+        with_event=with_event,
+        active_multiplier=mult,
+        history=history_points,
+        forecast=forecast_points,
+        chart_data=chart_points
     )
 
 

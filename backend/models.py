@@ -1,6 +1,8 @@
 from sqlalchemy import Column, Integer, String, Float, DateTime, Boolean, ForeignKey
 from sqlalchemy.orm import relationship
 from datetime import datetime
+from typing import List
+import json
 from backend.database import Base
 
 class Ingredient(Base):
@@ -37,7 +39,21 @@ class Event(Base):
     multiplier = Column(Float, default=3.0, nullable=False)
     starts_at = Column(DateTime, default=datetime.utcnow)
     ends_at = Column(DateTime, nullable=True)
-    active = Column(Boolean, default=False, nullable=False)
+    active = Column(Boolean, default=True, nullable=False)
+    ingredient_ids_str = Column(String(255), default="[]", nullable=False)
+
+    @property
+    def ingredient_ids(self) -> List[int]:
+        if not self.ingredient_ids_str:
+            return []
+        try:
+            return json.loads(self.ingredient_ids_str)
+        except Exception:
+            return []
+
+    @ingredient_ids.setter
+    def ingredient_ids(self, val: List[int]):
+        self.ingredient_ids_str = json.dumps(val if val is not None else [])
 
 
 class Alert(Base):

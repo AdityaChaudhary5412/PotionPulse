@@ -72,11 +72,17 @@ def seed_database(csv_path: str = "backend/sample_sales.csv"):
             print(f"✅ Created {movements_count} verified historical movement records.")
 
         # 3. Seed Midnight Curse Event
+        cursed_ids = [
+            ingredient_map["Bat Wings"].id,
+            ingredient_map["Ghost Pepper"].id,
+            ingredient_map["Mandrake Root"].id
+        ]
         curse_event = Event(
             name="Midnight Curse",
             multiplier=3.0,
             starts_at=datetime.utcnow(),
-            active=False
+            active=False,
+            ingredient_ids_str=f"[{cursed_ids[0]}, {cursed_ids[1]}, {cursed_ids[2]}]"
         )
         db.add(curse_event)
 
