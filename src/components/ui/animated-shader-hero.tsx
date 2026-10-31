@@ -565,3 +565,4 @@ export const AnimatedShaderHero: React.FC<AnimatedShaderHeroProps> = ({
 };
 
 export default AnimatedShaderHero;
+

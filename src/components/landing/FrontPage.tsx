@@ -1,5 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { AnimatedShaderHero } from '../ui/animated-shader-hero';
+import { ShaderAnimation } from '../ui/shader-animation';
+import { ShaderAnimationDemo } from '../ui/shader-animation-demo';
 import BorderBeamSearch from '../ui/border-beam-search';
 import {
   Sparkles,
@@ -184,6 +186,27 @@ export const FrontPage: React.FC<FrontPageProps> = ({
           </div>
         </div>
 
+        {/* 21st.dev @designali-in / components / shader-animation Template Section */}
+        <div className="mt-20">
+          <div className="text-center max-w-2xl mx-auto mb-8">
+            <span className="text-xs font-mono uppercase tracking-widest text-blue-400 bg-blue-500/10 border border-blue-400/20 px-3 py-1 rounded-full">
+              21st.dev @designali-in
+            </span>
+            <h3 className="text-2xl sm:text-4xl font-black text-white mt-3 mb-2">
+              Caustic Slatted Shader Animation
+            </h3>
+            <p className="text-xs sm:text-sm text-gray-400">
+              Procedural chromatic ripple waves with diagonal slatted Venetian blind reflections powered by WebGL.
+            </p>
+          </div>
+
+          <ShaderAnimationDemo
+            title="Shader Animation"
+            subtitle="Autonomous Reagent Wave Telemetry"
+            className="border-white/15"
+          />
+        </div>
+
         {/* Code Snippet Box (Matching the 21st.dev template usage section) */}
         <div id="docs" className="mt-16 p-8 rounded-3xl bg-black/60 border border-white/10 backdrop-blur-xl">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-white/10 pb-6 mb-6">
@@ -235,3 +258,4 @@ POST /agent/command {"prompt": "Simulate 3x surge on Bat Wings and audit for the
 };
 
 export default FrontPage;
+
