@@ -118,3 +118,4 @@ export const IngredientCard: React.FC<IngredientCardProps> = ({
 };
 
 export default IngredientCard;
+

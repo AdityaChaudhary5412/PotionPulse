@@ -17,6 +17,7 @@ interface InventoryViewProps {
   onRestock: (item: RestockItem) => void;
   onSale: (item: RestockItem) => void;
   onNewReagent: () => void;
+  onSelectIngredient?: (item: RestockItem) => void;
 }
 
 type SortField = 'ingredient' | 'stock' | 'days_until_stockout' | 'status' | 'lead_time_days' | 'daily_demand' | 'reorder_qty';
@@ -29,7 +30,8 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
   onRefresh,
   onRestock,
   onSale,
-  onNewReagent
+  onNewReagent,
+  onSelectIngredient
 }) => {
   const [search, setSearch] = useState<string>('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -248,7 +250,12 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
                       className="hover:bg-surface-subtle/50 transition-colors group"
                     >
                       {/* Name */}
-                      <td className="px-5 py-4 font-bold text-white group-hover:text-accent-light transition-colors">
+                      <td
+                        onClick={() => onSelectIngredient && onSelectIngredient(item)}
+                        className={`px-5 py-4 font-bold text-white transition-colors ${
+                          onSelectIngredient ? 'cursor-pointer hover:text-accent-light hover:underline' : ''
+                        }`}
+                      >
                         {item.ingredient}
                       </td>
 
@@ -328,3 +335,4 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
 };
 
 export default InventoryView;
+

@@ -168,3 +168,4 @@ export const RecordSaleDialog: React.FC<RecordSaleDialogProps> = ({
 };
 
 export default RecordSaleDialog;
+

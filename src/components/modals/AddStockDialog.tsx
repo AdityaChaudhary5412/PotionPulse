@@ -147,3 +147,4 @@ export const AddStockDialog: React.FC<AddStockDialogProps> = ({
 };
 
 export default AddStockDialog;
+
