@@ -1,0 +1,17 @@
+Transaction_Time,Reagent_Name,Sold_Volume,Action,Comments
+2026-10-25 09:12:00, Bat Wings , -4.0, sale, Coven batch potion
+2026-10-25 14:35:00,Dragon Scale,-2.0,sale,Fire resistance elixir
+2026-10-25 17:40:00,Mandrake Root,-5.0,sale,Screaming tonic
+2026-10-25 21:05:00,Ghost Pepper,-3.0,sale,Midnight curse brew
+2026-10-25 21:05:00,Ghost Pepper,-3.0,sale,Duplicate log error
+2026-10-26 10:15:00, Bat Wings, -6.0, sale, Shadow flight brew
+2026-10-26 16:20:00,Eye of Newt,-8.0,sale,All-seeing vision
+2026-10-26 19:45:00,Nightshade Essence,-3.0,sale,Deep slumber vial
+2026-10-27 11:30:00,Dragon Scale,-4.0,sale,Armor enchantment
+2026-10-27 18:22:00,Mandrake Root,-7.0,sale,Restorative potion
+2026-10-28 08:50:00,Phoenix Feather,-1.0,sale,Rebirth ashes
+2026-10-28 13:10:00,Spider Silk,-10.0,sale,Binding web spell
+2026-10-28 23:50:00, Bat Wings, -12.0, sale, Midnight Curse early spike
+2026-10-29 15:40:00,Ghost Pepper,-8.0,sale,Flaming cauldron trial
+2026-10-30 18:00:00,Mandrake Root,-9.0,sale,Witching hour salve
+

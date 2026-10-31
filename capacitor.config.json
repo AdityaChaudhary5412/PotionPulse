@@ -1,0 +1,11 @@
+{
+  "appId": "com.potionpulse.app",
+  "appName": "PotionPulse",
+  "webDir": "dist",
+  "bundledWebRuntime": false,
+  "server": {
+    "cleartext": true,
+    "allowNavigation": ["*"]
+  }
+}
+
