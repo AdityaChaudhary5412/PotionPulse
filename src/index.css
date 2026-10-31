@@ -50,3 +50,23 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #80FFF9;
 }
+
+/* 21st.dev Border Beam Animation Keyframes */
+@keyframes border-beam-line {
+  0% {
+    transform: translateX(-130%);
+  }
+  100% {
+    transform: translateX(380%);
+  }
+}
+
+@keyframes border-beam-rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+

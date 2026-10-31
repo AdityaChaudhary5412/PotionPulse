@@ -4,6 +4,7 @@ import {
   Sparkles, Flame, Database, RefreshCw, Zap, Bell, Sliders, XCircle, Search, Terminal
 } from 'lucide-react';
 import api from '../../services/api';
+import BorderBeamSearch from '../ui/border-beam-search';
 
 interface NavbarProps {
   onRefresh?: () => void;
@@ -118,18 +119,19 @@ export const Navbar: React.FC<NavbarProps> = ({
             </div>
           </div>
 
-          {/* Emergent Center Command Bar Pill (Desktop) */}
-          <div 
-            onClick={onQuickSearchClick}
-            className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-subtle/80 border border-surface-border text-gray-400 hover:text-gray-200 hover:border-white/20 transition-all cursor-pointer text-xs w-72 justify-between"
-          >
-            <div className="flex items-center gap-2">
-              <Search className="w-3.5 h-3.5 text-emergent-cyan" />
-              <span className="truncate">Search reagents, threats, stock...</span>
-            </div>
-            <kbd className="hidden lg:inline-block font-mono text-[10px] bg-black/40 px-1.5 py-0.5 rounded border border-white/10 text-gray-400">
-              ⌘K
-            </kbd>
+          {/* 21st.dev Border Beam Search Bar (Desktop) */}
+          <div className="hidden md:block w-72 lg:w-80">
+            <BorderBeamSearch
+              placeholder="Search reagents, stock..."
+              onSubmit={(q) => {
+                if (onQuickSearchClick) onQuickSearchClick();
+              }}
+              colorVariant="colorful"
+              duration={3.1}
+              height={38}
+              borderRadius={64}
+              width="100%"
+            />
           </div>
 
           {/* Right Action Controls: Alerts, Seed, Refresh, Curse Switch */}

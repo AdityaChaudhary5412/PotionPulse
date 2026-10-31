@@ -4,6 +4,7 @@ import { getStatusConfig } from '../../lib/constants';
 import LoadingState from '../ui/LoadingState';
 import EmptyState from '../ui/EmptyState';
 import ErrorState from '../ui/ErrorState';
+import BorderBeamSearch from '../ui/border-beam-search';
 import {
   Search, ArrowUpDown, ArrowUp, ArrowDown, ArrowUpRight, ArrowDownRight,
   Plus, SlidersHorizontal, Package, CheckCircle2, AlertTriangle, AlertOctagon
@@ -113,15 +114,17 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
 
       {/* Filter & Search Bar */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-surface p-2.5 rounded-2xl border border-surface-border">
-        {/* Search Input */}
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3.5 top-2.5 h-4 w-4 text-gray-400" />
-          <input
-            type="text"
+        {/* Border Beam Search Bar (21st.dev @larsen66) */}
+        <div className="flex-1 max-w-md">
+          <BorderBeamSearch
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search reagents or units..."
-            className="w-full rounded-xl border border-surface-border bg-surface-subtle py-2 pl-10 pr-4 text-xs text-white placeholder-gray-500 focus:border-white/30 focus:outline-none"
+            colorVariant="colorful"
+            duration={3.1}
+            width="100%"
+            height={40}
+            borderRadius={20}
           />
         </div>
 
