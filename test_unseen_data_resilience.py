@@ -247,3 +247,4 @@ def test_predict_performance_and_determinism():
     lines = res_1.text.strip().split("\n")
     assert lines[0].strip() == "ingredient,date,predicted_qty"
     assert len(lines) == 3  # Header + 2 ingredients
+
