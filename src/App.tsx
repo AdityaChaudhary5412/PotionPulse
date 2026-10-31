@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import BaseLayout from './components/layout/BaseLayout';
 import { useCurse } from './context/CurseContext';
 import { useApi } from './hooks/useApi';
@@ -17,7 +17,40 @@ import { Sparkles, AlertOctagon, X, Plus } from 'lucide-react';
 
 export default function App() {
   const { isCurseMode, isCurseModalOpen, setCurseModalOpen } = useCurse();
-  const [activeTab, setActiveTab] = useState<string>('dashboard');
+  const [activeTab, setActiveTabState] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      const hash = window.location.hash.replace('#', '');
+      if (['landing', 'dashboard', 'inventory', 'demand', 'anomalies'].includes(hash)) {
+        return hash;
+      }
+      const params = new URLSearchParams(window.location.search);
+      const tabParam = params.get('tab');
+      if (tabParam && ['landing', 'dashboard', 'inventory', 'demand', 'anomalies'].includes(tabParam)) {
+        return tabParam;
+      }
+    }
+    return 'landing';
+  });
+
+  const setActiveTab = (tab: string) => {
+    setActiveTabState(tab);
+    if (typeof window !== 'undefined') {
+      window.location.hash = tab === 'landing' ? '' : tab;
+    }
+  };
+
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.replace('#', '');
+      if (hash && ['landing', 'dashboard', 'inventory', 'demand', 'anomalies'].includes(hash)) {
+        setActiveTabState(hash);
+      } else if (!hash) {
+        setActiveTabState('landing');
+      }
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
   const [selectedIngredientId, setSelectedIngredientId] = useState<number>(1);
   const [toast, setToast] = useState<{ msg: string; isErr?: boolean } | null>(null);
 
