@@ -5,9 +5,9 @@ from pathlib import Path
 
 # Flexible alias mappings to tolerate renamed or reordered CSV/Excel columns
 COLUMN_ALIASES = {
-    "date": ["date", "timestamp", "ts", "datetime", "time", "tx_date", "day"],
-    "ingredient": ["ingredient", "item", "name", "reagent", "product", "ingredient_name", "item_name"],
-    "qty": ["qty", "quantity", "amount", "sales", "volume", "units", "units_sold", "change_amount"],
+    "date": ["date", "timestamp", "ts", "datetime", "time", "tx_date", "day", "transaction_time", "tx_time"],
+    "ingredient": ["ingredient", "item", "name", "reagent", "product", "ingredient_name", "item_name", "reagent_name"],
+    "qty": ["qty", "quantity", "amount", "sales", "volume", "units", "units_sold", "change_amount", "sold_volume"],
     "type": ["type", "tx_type", "transaction_type", "movement_type", "action"]
 }
 

@@ -1,4 +1,5 @@
 import io
+import uuid
 import pytest
 from fastapi.testclient import TestClient
 from backend.main import app
@@ -13,9 +14,11 @@ def test_health_endpoint():
     assert "total_ingredients" in data
 
 def test_ingredients_crud():
+    unique_suffix = int(uuid.uuid4().int % 1000000)
+    unique_name = f"Wyrm Heart Ash {unique_suffix}"
     # 1. Create
     create_res = client.post("/ingredients", json={
-        "name": "Wyrm Heart Ash",
+        "name": unique_name,
         "unit": "grams",
         "current_stock": 50.0,
         "lead_time_days": 5
@@ -23,13 +26,13 @@ def test_ingredients_crud():
     assert create_res.status_code == 201
     item = create_res.json()
     item_id = item["id"]
-    assert item["name"] == "Wyrm Heart Ash"
+    assert item["name"] == unique_name
     assert item["current_stock"] == 50.0
 
     # 2. Read single
     get_res = client.get(f"/ingredients/{item_id}")
     assert get_res.status_code == 200
-    assert get_res.json()["name"] == "Wyrm Heart Ash"
+    assert get_res.json()["name"] == unique_name
 
     # 3. Update
     put_res = client.put(f"/ingredients/{item_id}", json={"current_stock": 42.0, "lead_time_days": 8})
@@ -45,13 +48,17 @@ def test_ingredients_crud():
     assert client.get(f"/ingredients/{item_id}").status_code == 404
 
 def test_post_sales_and_stock():
+    unique_suffix = int(uuid.uuid4().int % 1000000)
+    unique_name = f"Salamander Tail {unique_suffix}"
     # Setup test reagent
-    item = client.post("/ingredients", json={
-        "name": "Salamander Tail",
+    create_res = client.post("/ingredients", json={
+        "name": unique_name,
         "unit": "tails",
         "current_stock": 20.0,
         "lead_time_days": 3
-    }).json()
+    })
+    assert create_res.status_code == 201
+    item = create_res.json()
     item_id = item["id"]
 
     # Record sale
@@ -147,3 +154,4 @@ def test_post_predict_friendly_error_on_invalid_file():
     assert res.status_code == 400
     assert "detail" in res.json()
     assert "essential columns" in res.json()["detail"].lower()
+

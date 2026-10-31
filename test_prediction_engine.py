@@ -1,53 +1,57 @@
 import pytest
-from fastapi.testclient import TestClient
-from backend.main import app, SessionLocal, Item, Transaction, Anomaly
+import pandas as pd
+import numpy as np
+from forecast import (
+    seasonal_naive_forecast,
+    moving_average_forecast,
+    exponential_smoothing_forecast,
+    compute_metrics,
+    validate_baselines,
+    best_baseline,
+    generate_sample_time_series
+)
 
-client = TestClient(app)
+def test_seasonal_naive_forecast():
+    # 7-day pattern
+    series = pd.Series([10.0, 12.0, 14.0, 15.0, 18.0, 25.0, 30.0])
+    # Next day (horizon 1) should match series[-7] -> 10.0
+    preds = seasonal_naive_forecast(series, horizon=1, season_length=7)
+    assert preds == [10.0]
 
-def test_seed_and_initial_inventory():
-    res = client.post("/seed")
-    assert res.status_code == 200
-    
-    items_res = client.get("/items")
-    assert items_res.status_code == 200
-    items = items_res.data if hasattr(items_res, 'data') else items_res.json()
-    assert len(items) >= 8
+def test_moving_average_forecast():
+    # 7 values with mean 10.0
+    series = pd.Series([10.0] * 7)
+    preds = moving_average_forecast(series, window=7, horizon=1)
+    assert preds == [10.0]
 
-def test_stock_sale_and_transaction_audit():
-    # Record sale of 1 unit of Bat Wings
-    res = client.put("/items/1/stock", json={"change_amount": -1, "tx_type": "sale", "notes": "Test Potion Brewed"})
-    assert res.status_code == 200
-    data = res.json()
-    assert data["item_id"] == 1
+def test_exponential_smoothing_forecast():
+    series = pd.Series([10.0, 20.0, 10.0, 20.0])
+    preds = exponential_smoothing_forecast(series, alpha=0.5, horizon=1)
+    assert len(preds) == 1
+    assert isinstance(preds[0], float)
 
-    # Check transactions
-    tx_res = client.get("/transactions")
-    assert tx_res.status_code == 200
-    txs = tx_res.json()
-    assert len(txs) > 0
-    assert txs[0]["change_amount"] == -1
+def test_compute_metrics():
+    actual = np.array([10.0, 20.0, 30.0])
+    predicted = np.array([10.0, 20.0, 30.0])
+    wape, bias, mae = compute_metrics(actual, predicted)
+    assert wape == 0.0
+    assert bias == 0.0
+    assert mae == 0.0
 
-def test_midnight_curse_spike_multiplier():
-    # Get standard forecast for Bat Wings
-    f_norm = client.get("/api/forecast/1?full_moon_festival=false").json()
-    
-    # Get cursed forecast (+300% spike)
-    f_curse = client.get("/api/forecast/1?full_moon_festival=true").json()
-    
-    assert f_curse["is_cursed"] is True
-    # Demand should triple
-    assert f_curse["daily_demand"] == pytest.approx(f_norm["daily_demand"] * 3.0, rel=0.1)
-    # Days left should drop to approximately one third
-    assert f_curse["days_until_stockout"] < f_norm["days_until_stockout"]
+    # Over-prediction by 10%
+    predicted_high = np.array([11.0, 22.0, 33.0])
+    wape_h, bias_h, mae_h = compute_metrics(actual, predicted_high)
+    assert pytest.approx(wape_h, 0.01) == 0.10
+    assert pytest.approx(bias_h, 0.01) == 0.10
 
-def test_anomaly_detection_trigger():
-    # Inject an abnormally massive consumption spike (e.g. 150 units)
-    res = client.put("/items/2/stock", json={"change_amount": -150, "tx_type": "sale", "notes": "Coven Bulk Theft"})
-    assert res.status_code == 200
+def test_validate_baselines_and_best_baseline():
+    df = generate_sample_time_series(days=28)
+    table = validate_baselines(df, holdout_days=7)
+    assert not table.empty
+    assert "wape" in table.columns
+    assert "bias" in table.columns
 
-    anom_res = client.get("/api/anomalies")
-    assert anom_res.status_code == 200
-    anomalies = anom_res.json()
-    descriptions = [a["description"] for a in anomalies]
-    assert any("Dragon Scale" in d or "Item #2" in d for d in descriptions)
-
+    winner = best_baseline("Bat Wings", validation_table=table)
+    assert winner["ingredient"] == "Bat Wings"
+    assert "best_method" in winner
+    assert "wape" in winner
