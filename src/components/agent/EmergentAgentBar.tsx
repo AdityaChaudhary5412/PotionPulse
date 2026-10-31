@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
-import { Sparkles, CornerDownLeft, Zap, Package, TrendingUp, AlertTriangle, Wand2, RefreshCw } from 'lucide-react';
+import {
+  Sparkles, CornerDownLeft, Zap, Package, TrendingUp, AlertTriangle,
+  Wand2, CheckCircle2, Bot, ChevronDown, ChevronUp, ArrowRight
+} from 'lucide-react';
 import api from '../../services/api';
-import { useCurse } from '../../context/CurseContext';
+import { AgentCommandResponse } from '../../types';
 
 interface EmergentAgentBarProps {
   onNavigateTab: (tab: string) => void;
@@ -16,94 +19,46 @@ export const EmergentAgentBar: React.FC<EmergentAgentBarProps> = ({
 }) => {
   const [prompt, setPrompt] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
-  const { activateCurse, deactivateCurse, isCurseMode } = useCurse();
+  const [agentTrace, setAgentTrace] = useState<AgentCommandResponse | null>(null);
+  const [traceExpanded, setTraceExpanded] = useState<boolean>(true);
 
   const suggestions = [
-    { label: 'Simulate 3x Surge', cmd: 'curse 3' },
-    { label: 'Check Depletion Threats', cmd: 'critical' },
-    { label: 'View ML Prophecy', cmd: 'prophecy' },
-    { label: 'Reseed Pantry Ledger', cmd: 'reseed' }
+    { label: 'Simulate 3x Surge', cmd: 'Simulate 3x surge on Bat Wings and Ghost Pepper' },
+    { label: 'Auto-Restock Critical', cmd: 'Restock all critical items' },
+    { label: 'Forecast Bat Wings', cmd: 'Forecast demand for Bat Wings' },
+    { label: 'Forensic Theft Audit', cmd: 'Scan pantry for anomalies and theft' },
+    { label: 'Reseed Demo Ledger', cmd: 'Reseed pantry ledger' }
   ];
 
   const handleCommand = async (inputStr: string) => {
-    const raw = inputStr.trim().toLowerCase();
+    const raw = inputStr.trim();
     if (!raw) return;
 
     setIsProcessing(true);
     setPrompt('');
 
     try {
-      if (raw.includes('reseed') || raw.includes('seed')) {
-        await api.system.seed();
+      const response = await api.agent.command(raw);
+      setAgentTrace(response);
+      setTraceExpanded(true);
+
+      if (response.success) {
+        showToast(response.result);
         onRefreshAll();
-        showToast('Hexley AI reseeded the pantry ledger with verified samples.');
-      } else if (raw.includes('curse') || raw.includes('surge') || raw.includes('spike')) {
-        if (raw.includes('off') || raw.includes('stop') || raw.includes('dispel')) {
-          await deactivateCurse();
-          showToast('Hexley AI dispelled active curse. Returned to standard baseline.');
-        } else {
-          // Extract multiplier if any
-          const match = raw.match(/(\d+(\.\d+)?)/);
-          const mult = match ? parseFloat(match[1]) : 3.0;
-          await activateCurse({
-            name: 'Agentic Surge',
-            multiplier: mult,
-            ingredient_ids: [1, 4, 5],
-          });
-          showToast(`Hexley AI activated ${mult.toFixed(1)}x demand surge!`);
-        }
-        onRefreshAll();
-      } else if (raw.includes('restock') || raw.includes('add stock')) {
-        // Find if user specified an ingredient
-        const ingredients = await api.ingredients.list();
-        const found = ingredients.find((ing) => raw.includes(ing.name.toLowerCase()));
-        if (found) {
-          const qtyMatch = raw.match(/(\d+(\.\d+)?)/);
-          const qty = qtyMatch ? parseFloat(qtyMatch[1]) : 15;
-          await api.stock.adjust(found.id, {
-            qty,
-            type: 'restock',
-            note: 'Hexley AI agent auto-replenishment'
-          });
-          onRefreshAll();
-          showToast(`Agent restocked +${qty} ${found.unit} to ${found.name}.`);
-        } else {
+
+        // Contextual navigation
+        if (response.intent === 'audit') {
+          onNavigateTab('anomalies');
+        } else if (response.intent === 'forecast') {
+          onNavigateTab('demand');
+        } else if (response.intent === 'restock' || response.intent === 'sale') {
           onNavigateTab('inventory');
-          showToast('Select an ingredient in the ledger to restock.');
         }
-      } else if (raw.includes('sale') || raw.includes('dispense') || raw.includes('brew')) {
-        const ingredients = await api.ingredients.list();
-        const found = ingredients.find((ing) => raw.includes(ing.name.toLowerCase()));
-        if (found) {
-          const qtyMatch = raw.match(/(\d+(\.\d+)?)/);
-          const qty = qtyMatch ? parseFloat(qtyMatch[1]) : 2;
-          await api.sales.record({
-            ingredient_id: found.id,
-            qty,
-            note: 'Hexley AI agent brew order'
-          });
-          onRefreshAll();
-          showToast(`Agent recorded sale of ${qty} ${found.unit} of ${found.name}.`);
-        } else {
-          onNavigateTab('inventory');
-          showToast('Select an ingredient in the ledger to dispense.');
-        }
-      } else if (raw.includes('threat') || raw.includes('alert') || raw.includes('anomal')) {
-        onNavigateTab('anomalies');
-        showToast('Switched to Threat & Anomaly Feed.');
-      } else if (raw.includes('prophecy') || raw.includes('demand') || raw.includes('forecast') || raw.includes('chart')) {
-        onNavigateTab('demand');
-        showToast('Switched to LightGBM Demand Prophecy.');
-      } else if (raw.includes('ledger') || raw.includes('inventory') || raw.includes('table')) {
-        onNavigateTab('inventory');
-        showToast('Switched to Pantry Inventory Ledger.');
       } else {
-        // Default to overview
-        onNavigateTab('dashboard');
-        showToast(`Hexley AI parsed instruction: "${inputStr}"`);
+        showToast(response.result, true);
       }
     } catch (err: any) {
-      showToast(err?.message || 'AI agent could not complete instruction.', true);
+      showToast(err?.message || 'Emergent agent backend communication error.', true);
     } finally {
       setIsProcessing(false);
     }
@@ -115,9 +70,102 @@ export const EmergentAgentBar: React.FC<EmergentAgentBarProps> = ({
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto mt-8 mb-4">
+    <div className="w-full max-w-4xl mx-auto mt-8 mb-4 space-y-3">
+      {/* Emergent Live Agent Trace Drawer */}
+      {agentTrace && (
+        <div className="emergent-glass-card p-4 text-xs space-y-3 border border-emergent-cyan/30 animate-in fade-in slide-in-from-bottom duration-300">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 rounded-lg bg-emergent-cyan/15 text-emergent-cyan border border-emergent-cyan/30">
+                <Bot className="w-4 h-4" />
+              </div>
+              <div>
+                <span className="font-bold text-white uppercase tracking-wider text-[11px]">
+                  Emergent Agentic Reasoning
+                </span>
+                <span className="ml-2 font-mono text-[10px] text-emergent-cyan bg-emergent-cyan/10 px-2 py-0.5 rounded-full border border-emergent-cyan/20">
+                  {agentTrace.intent.toUpperCase()}
+                </span>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setTraceExpanded(!traceExpanded)}
+              className="text-gray-400 hover:text-white p-1 rounded-lg hover:bg-surface-subtle transition-all"
+            >
+              {traceExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+            </button>
+          </div>
+
+          {traceExpanded && (
+            <div className="space-y-2.5 pt-2 border-t border-surface-border">
+              {/* Agent Thought */}
+              <div className="rounded-xl bg-black/40 p-2.5 border border-white/5 font-mono text-[11px] text-gray-300">
+                <span className="text-emergent-cyan font-semibold block mb-0.5">Thought:</span>
+                {agentTrace.thought}
+              </div>
+
+              {/* Plan & Execution Steps */}
+              {agentTrace.plan.length > 0 && (
+                <div className="space-y-1">
+                  <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">
+                    Plan Executed:
+                  </span>
+                  <ul className="space-y-1">
+                    {agentTrace.plan.map((step, idx) => (
+                      <li key={idx} className="flex items-start gap-1.5 text-gray-300 text-[11px]">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emergent-green shrink-0 mt-0.5" />
+                        <span>{step}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Real DB Actions Taken */}
+              {agentTrace.actions_taken.length > 0 && (
+                <div className="rounded-xl bg-surface-subtle p-2.5 border border-surface-border text-[11px]">
+                  <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider block mb-1">
+                    Database Commit:
+                  </span>
+                  {agentTrace.actions_taken.map((act, idx) => (
+                    <div key={idx} className="text-emergent-green font-mono text-[11px]">
+                      &gt; {act}
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Result Summary */}
+              <div className="p-2.5 rounded-xl bg-white/5 border border-white/10 text-white font-medium text-xs">
+                {agentTrace.result}
+              </div>
+
+              {/* Follow-up Suggestion Pills */}
+              {agentTrace.suggestions.length > 0 && (
+                <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-1">
+                  <span className="text-[10px] text-gray-500 font-mono uppercase tracking-wider shrink-0">
+                    Next:
+                  </span>
+                  {agentTrace.suggestions.map((sug, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => handleCommand(sug)}
+                      className="px-2.5 py-1 rounded-full bg-surface-subtle hover:bg-surface border border-surface-border text-[10px] text-gray-300 hover:text-white transition-all whitespace-nowrap active:scale-95 flex items-center gap-1"
+                    >
+                      <span>{sug}</span>
+                      <ArrowRight className="w-2.5 h-2.5 text-emergent-cyan" />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Quick Suggestion Pills */}
-      <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar mb-2 px-1">
+      <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar px-1">
         <span className="text-[10px] font-mono text-gray-400 uppercase tracking-wider flex items-center gap-1 shrink-0">
           <Wand2 className="w-3 h-3 text-emergent-cyan" />
           Vibe Prompts:
@@ -146,7 +194,7 @@ export const EmergentAgentBar: React.FC<EmergentAgentBarProps> = ({
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             disabled={isProcessing}
-            placeholder="Describe an action to Hexley AI (e.g., 'Restock 30 Bat Wings', 'Simulate 3x surge', 'Show anomalies')..."
+            placeholder="Describe an action to Hexley AI (e.g., 'Restock 30 Bat Wings', 'Simulate 3x surge', 'Audit for theft')..."
             className="w-full bg-transparent px-3 py-2 text-xs text-white placeholder-gray-500 focus:outline-none"
           />
 

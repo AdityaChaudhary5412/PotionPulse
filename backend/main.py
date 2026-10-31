@@ -18,10 +18,12 @@ from backend.schemas import (
     MovementOut, SaleCreate, StockChange,
     EventCreate, EventOut, AlertOut, HealthResponse,
     RestockItem, SummaryResponse,
-    DemandResponse, DemandHistoryPoint, DemandForecastPoint, DemandChartPoint
+    DemandResponse, DemandHistoryPoint, DemandForecastPoint, DemandChartPoint,
+    AgentCommandRequest, AgentCommandResponse
 )
 from backend import crud
 from backend.seed import seed_database
+from backend.agent_engine import EmergentAgentEngine
 from backend.data_cleaner import (
     resolve_column, COLUMN_ALIASES, load_and_clean,
     parse_flexible_dates, sanitize_quantities,
@@ -827,4 +829,19 @@ def seed_endpoint():
     """Seed the database with sample ingredients, cleaned sales history, and events."""
     seed_database()
     return {"message": "Database seeded successfully with clean movements and initial alerts."}
+
+
+# ==============================================================================
+# 9. EMERGENT AGENTIC COMMAND PIPELINE
+# ==============================================================================
+@app.post("/agent/command", response_model=AgentCommandResponse, tags=["Emergent Agent"])
+def agent_command_endpoint(payload: AgentCommandRequest, db: Session = Depends(get_db)):
+    """
+    Processes natural language commands through Emergent's multi-agent execution pipeline.
+    Executes real database adjustments, restocks, sales, surge simulations, or forensically audits anomalies.
+    """
+    engine = EmergentAgentEngine(db)
+    result = engine.execute(payload.prompt)
+    return AgentCommandResponse(**result)
+
 

@@ -144,4 +144,19 @@ class SummaryResponse(BaseModel):
     nearest_stockout_days: Optional[float] = None
     total_ingredients: int
 
+# Emergent Agentic Command Schemas
+class AgentCommandRequest(BaseModel):
+    prompt: str = Field(..., example="Restock 20 Bat Wings")
+
+class AgentCommandResponse(BaseModel):
+    success: bool
+    intent: str
+    thought: str
+    plan: List[str]
+    actions_taken: List[str]
+    result: str
+    suggestions: List[str]
+    data: Optional[dict] = None
+
+
 

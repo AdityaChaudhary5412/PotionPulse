@@ -18,7 +18,8 @@ import {
   SurgeEventCreate,
   AlertItem,
   HealthResponse,
-  UploadSummary
+  UploadSummary,
+  AgentCommandResponse
 } from '../types';
 
 // Default to localhost:8000 or custom environment variable
@@ -201,6 +202,14 @@ export const api = {
   system: {
     seed: async (): Promise<{ message: string }> => {
       const res = await client.post<{ message: string }>('/seed');
+      return res.data;
+    },
+  },
+
+  // 10. Emergent Agent Pipeline
+  agent: {
+    command: async (prompt: string): Promise<AgentCommandResponse> => {
+      const res = await client.post<AgentCommandResponse>('/agent/command', { prompt });
       return res.data;
     },
   },

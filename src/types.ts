@@ -147,3 +147,14 @@ export interface UploadSummary {
   rejected_count: number;
   rejection_reasons: Record<string, string[]>;
 }
+
+export interface AgentCommandResponse {
+  success: boolean;
+  intent: string;
+  thought: string;
+  plan: string[];
+  actions_taken: string[];
+  result: string;
+  suggestions: string[];
+  data?: Record<string, any> | null;
+}
