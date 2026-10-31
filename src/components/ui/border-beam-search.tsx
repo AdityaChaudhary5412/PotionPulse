@@ -27,8 +27,8 @@ const COLOR_VARIANTS: Record<BorderBeamColorVariant, string> = {
 };
 
 /**
- * Animated border beam effect component matching 21st.dev @larsen66/components/border-beam-search.
- * Supports the 'line' preset (a bottom-only traveling glow) as well as full border glows.
+ * Border beam effect component.
+ * Animation is disabled by default (active = false) per user preference.
  */
 export const BorderBeam: React.FC<BorderBeamProps> = ({
   children,
@@ -37,7 +37,7 @@ export const BorderBeam: React.FC<BorderBeamProps> = ({
   duration = 3.1,
   borderRadius = 64,
   strength = 1,
-  active = true,
+  active = false,
   className = '',
   style = {},
 }) => {
@@ -156,12 +156,13 @@ export interface BorderBeamSearchProps {
   borderRadius?: number;
   autoFocus?: boolean;
   className?: string;
+  active?: boolean;
 }
 
 /**
- * Exact replica of the search bar from https://21st.dev/@larsen66/components/border-beam-search
+ * Clean obsidian search bar component inspired by 21st.dev @larsen66/components/border-beam-search.
  * Built with rounded obsidian card, inner shadow bevel, 20px SVG search icon,
- * and the animated bottom-edge border beam.
+ * with animation disabled by default.
  */
 export const BorderBeamSearch: React.FC<BorderBeamSearchProps> = ({
   value,
@@ -175,6 +176,7 @@ export const BorderBeamSearch: React.FC<BorderBeamSearchProps> = ({
   borderRadius = 64,
   autoFocus = false,
   className = '',
+  active = false,
 }) => {
   const [internalValue, setInternalValue] = useState('');
   const isControlled = value !== undefined;
@@ -196,6 +198,7 @@ export const BorderBeamSearch: React.FC<BorderBeamSearchProps> = ({
 
   return (
     <BorderBeam
+      active={active}
       size="line"
       colorVariant={colorVariant}
       duration={duration}

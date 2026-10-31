@@ -142,7 +142,7 @@ export const FrontPage: React.FC<FrontPageProps> = ({
               </button>
             </div>
 
-            {/* Border Beam Search */}
+            {/* Search Bar (Static & Clean) */}
             <div className="w-full max-w-md mx-auto mt-8">
               <BorderBeamSearch
                 placeholder="Search reagents, spells, stockout threat..."
@@ -150,8 +150,6 @@ export const FrontPage: React.FC<FrontPageProps> = ({
                   if (onQuickSearch) onQuickSearch(val);
                   onEnterApp();
                 }}
-                colorVariant="colorful"
-                duration={3.1}
                 width="100%"
                 height={44}
                 borderRadius={64}
@@ -191,8 +189,6 @@ export const FrontPage: React.FC<FrontPageProps> = ({
                 if (onQuickSearch) onQuickSearch(val);
                 onEnterApp();
               }}
-              colorVariant="colorful"
-              duration={3.1}
               width="100%"
               height={44}
               borderRadius={64}
