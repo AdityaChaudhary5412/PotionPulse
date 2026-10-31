@@ -12,6 +12,20 @@ export default defineConfig({
   server: {
     port: 3000,
     host: true,
+    proxy: {
+      '/health': 'http://127.0.0.1:8000',
+      '/ingredients': 'http://127.0.0.1:8000',
+      '/sales': 'http://127.0.0.1:8000',
+      '/movements': 'http://127.0.0.1:8000',
+      '/upload': 'http://127.0.0.1:8000',
+      '/predict': 'http://127.0.0.1:8000',
+      '/restock': 'http://127.0.0.1:8000',
+      '/summary': 'http://127.0.0.1:8000',
+      '/demand': 'http://127.0.0.1:8000',
+      '/events': 'http://127.0.0.1:8000',
+      '/alerts': 'http://127.0.0.1:8000',
+      '/seed': 'http://127.0.0.1:8000',
+    },
   },
 })
 

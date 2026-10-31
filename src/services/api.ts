@@ -21,8 +21,10 @@ import {
   UploadSummary
 } from '../types';
 
-// Default to same-origin or localhost:8000
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+// Default to localhost:8000 or custom environment variable
+const API_BASE_URL = import.meta.env.VITE_API_URL !== undefined && import.meta.env.VITE_API_URL !== ''
+  ? import.meta.env.VITE_API_URL
+  : 'http://localhost:8000';
 
 const client = axios.create({
   baseURL: API_BASE_URL,
@@ -37,9 +39,15 @@ const client = axios.create({
  */
 export function formatApiError(error: unknown): string {
   if (axios.isAxiosError(error)) {
+    if (error.code === 'ERR_NETWORK' || !error.response) {
+      return `Cannot connect to backend server at ${API_BASE_URL}. Ensure FastAPI is running (uvicorn backend.main:app --port 8000).`;
+    }
     const data = error.response?.data;
     if (data && typeof data === 'object' && 'detail' in data) {
       return String(data.detail);
+    }
+    if (error.response?.status === 404) {
+      return `Endpoint not found (404) on ${API_BASE_URL}. Ensure backend is running and seeded.`;
     }
     return error.message || 'Network communication error with PotionPulse server.';
   }
