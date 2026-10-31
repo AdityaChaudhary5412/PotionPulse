@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException, Depends, status, UploadFile, File, R
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
-from typing import List
+from typing import List, Optional, Dict, Any
 from datetime import datetime, timedelta
 import io
 import csv
@@ -28,6 +28,15 @@ try:
 except ImportError:
     from backend.restock import (
         days_until_stockout, safety_stock, reorder_quantity, status as stock_status, compute_restock_profile
+    )
+
+try:
+    from anomalies import (
+        scan_and_record_alerts, detect_spikes, detect_missing_stock, detect_drop_to_zero
+    )
+except ImportError:
+    from backend.anomalies import (
+        scan_and_record_alerts, detect_spikes, detect_missing_stock, detect_drop_to_zero
     )
 
 # Create tables
@@ -163,9 +172,28 @@ def toggle_event(event_id: int, db: Session = Depends(get_db)):
     return event
 
 @app.get("/alerts", response_model=List[AlertOut], tags=["Events & Alerts"])
-def list_alerts(db: Session = Depends(get_db)):
-    """List all stockout warnings and statistical anomaly alerts."""
-    return db.query(Alert).order_by(desc(Alert.ts)).limit(30).all()
+def list_alerts(
+    severity: Optional[str] = None, 
+    type: Optional[str] = None,
+    limit: int = 50,
+    db: Session = Depends(get_db)
+):
+    """
+    List all stockout warnings, statistical spikes, and missing stock alerts.
+    Scans recent inventory telemetry to detect and record new anomalies.
+    """
+    try:
+        scan_and_record_alerts(db, persist=True)
+    except Exception as e:
+        print(f"Warning: anomaly scan failed: {e}")
+
+    query = db.query(Alert)
+    if severity:
+        query = query.filter(Alert.severity.ilike(severity))
+    if type:
+        query = query.filter(Alert.type.ilike(type))
+
+    return query.order_by(desc(Alert.ts)).limit(limit).all()
 
 # ==============================================================================
 # 5. CSV UPLOAD PIPELINE (VALIDATION & ACCEPTED/REJECTED AUDIT)

@@ -54,3 +54,4 @@ def test_status_classification():
     assert status(1.9) == "critical"
     assert status(1.4) == "critical"
     assert status(0.0) == "critical"
+
