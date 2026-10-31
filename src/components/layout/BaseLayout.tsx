@@ -1,23 +1,26 @@
 import React from 'react';
 import Navbar from './Navbar';
 import { useCurse } from '../../context/CurseContext';
-import { ShieldCheck, Activity, Terminal } from 'lucide-react';
 
 interface BaseLayoutProps {
   children: React.ReactNode;
   onRefresh?: () => void;
   activeTab?: string;
   onTabChange?: (tab: string) => void;
+  alertCount?: number;
+  onNavigateAlerts?: () => void;
+  onOpenCurseModal?: () => void;
 }
 
 export const BaseLayout: React.FC<BaseLayoutProps> = ({
   children,
   onRefresh,
-  activeTab = 'shelves',
-  onTabChange
+  activeTab = 'dashboard',
+  onTabChange,
+  alertCount = 0,
+  onNavigateAlerts,
+  onOpenCurseModal
 }) => {
-  const { isCurseMode } = useCurse();
-
   const tabs = [
     { id: 'dashboard', label: 'Dashboard', icon: '✨' },
     { id: 'inventory', label: 'Inventory Ledger', icon: '📦' },
@@ -27,8 +30,13 @@ export const BaseLayout: React.FC<BaseLayoutProps> = ({
 
   return (
     <div className="min-h-screen bg-background text-gray-100 flex flex-col font-sans">
-      {/* Top Navbar with Logo & Curse Mode Switch */}
-      <Navbar onRefresh={onRefresh} />
+      {/* Top Navbar with Logo, Curse Mode Switch, and Alert Count Badge */}
+      <Navbar
+        onRefresh={onRefresh}
+        alertCount={alertCount}
+        onNavigateAlerts={onNavigateAlerts}
+        onOpenCurseModal={onOpenCurseModal}
+      />
 
       {/* Navigation Sub-bar */}
       {onTabChange && (
@@ -49,6 +57,11 @@ export const BaseLayout: React.FC<BaseLayoutProps> = ({
                   >
                     <span>{tab.icon}</span>
                     <span>{tab.label}</span>
+                    {tab.id === 'anomalies' && alertCount > 0 && (
+                      <span className="ml-1 rounded-full bg-rose-600 px-1.5 py-0.2 text-[10px] font-bold text-white shadow-sm">
+                        {alertCount}
+                      </span>
+                    )}
                   </button>
                 );
               })}
@@ -82,4 +95,3 @@ export const BaseLayout: React.FC<BaseLayoutProps> = ({
 };
 
 export default BaseLayout;
-

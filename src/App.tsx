@@ -7,16 +7,14 @@ import { RestockItem, PantrySummary, AlertItem } from './types';
 import DashboardView from './components/dashboard/DashboardView';
 import InventoryView from './components/inventory/InventoryView';
 import IngredientDetailView from './components/detail/IngredientDetailView';
+import AlertsView from './components/alerts/AlertsView';
 import AddStockDialog from './components/modals/AddStockDialog';
 import RecordSaleDialog from './components/modals/RecordSaleDialog';
-import LoadingState from './components/ui/LoadingState';
-import ErrorState from './components/ui/ErrorState';
-import {
-  Sparkles, ShieldAlert, Flame, AlertTriangle, AlertOctagon, X
-} from 'lucide-react';
+import CurseConfigDialog from './components/modals/CurseConfigDialog';
+import { Sparkles, AlertOctagon, X } from 'lucide-react';
 
 export default function App() {
-  const { isCurseMode } = useCurse();
+  const { isCurseMode, isCurseModalOpen, setCurseModalOpen } = useCurse();
   const [activeTab, setActiveTab] = useState<string>('dashboard');
   const [selectedIngredientId, setSelectedIngredientId] = useState<number>(1);
   const [toast, setToast] = useState<{ msg: string; isErr?: boolean } | null>(null);
@@ -70,7 +68,7 @@ export default function App() {
     error: alertsError,
     refetch: refetchAlerts
   } = useApi<AlertItem[]>(
-    () => api.alerts.list(undefined, 30),
+    () => api.alerts.list(undefined, 50),
     {},
     []
   );
@@ -101,8 +99,17 @@ export default function App() {
     }
   };
 
+  const alertCount = summary?.alerts_today ?? alerts?.length ?? 0;
+
   return (
-    <BaseLayout activeTab={activeTab} onTabChange={setActiveTab} onRefresh={refreshAll}>
+    <BaseLayout
+      activeTab={activeTab}
+      onTabChange={setActiveTab}
+      onRefresh={refreshAll}
+      alertCount={alertCount}
+      onNavigateAlerts={() => setActiveTab('anomalies')}
+      onOpenCurseModal={() => setCurseModalOpen(true)}
+    >
       {/* Toast Notification */}
       {toast && (
         <div
@@ -174,56 +181,18 @@ export default function App() {
         />
       )}
 
-      {/* TAB 4: STRANGE HAPPENINGS (ANOMALIES AUDIT) */}
+      {/* TAB 4: ALERTS SCREEN (TABLE WITH SEVERITY BADGES, PLAIN-LANGUAGE REASONS, NEWEST FIRST) */}
       {activeTab === 'anomalies' && (
-        <section className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold text-white flex items-center gap-2">
-              <ShieldAlert className="w-5 h-5 text-rose-400" />
-              <span>Strange Happenings & Risk Audit</span>
-            </h2>
-          </div>
-
-          {loadingAlerts && !alerts ? (
-            <LoadingState message="Auditing ledger for phantom discrepancies and sudden spikes..." cardCount={4} />
-          ) : alertsError ? (
-            <ErrorState error={alertsError} onRetry={refetchAlerts} />
-          ) : !alerts || alerts.length === 0 ? (
-            <div className="rounded-2xl border border-surface-border bg-surface p-8 text-center text-gray-400 text-xs">
-              No strange anomalies detected today. The coven is calm.
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {alerts.map((al) => (
-                <div
-                  key={al.id}
-                  className="flex items-start gap-3 rounded-2xl border border-surface-border bg-surface p-4 shadow-sm"
-                >
-                  <div className={`rounded-xl p-2.5 ${
-                    al.severity === 'high' || al.severity === 'critical'
-                      ? 'bg-rose-950/60 text-rose-400'
-                      : 'bg-amber-950/60 text-amber-400'
-                  }`}>
-                    {al.type === 'SPIKE' ? <Flame className="w-5 h-5" /> : <AlertTriangle className="w-5 h-5" />}
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between">
-                      <span className="font-semibold text-white text-sm">
-                        {al.type.replace('_', ' ')}
-                      </span>
-                      <span className="text-[10px] text-gray-500 uppercase tracking-wider font-mono">
-                        {new Date(al.ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                      </span>
-                    </div>
-                    <p className="mt-1 text-xs text-gray-300">
-                      {al.description}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
+        <AlertsView
+          alerts={alerts}
+          loading={loadingAlerts}
+          error={alertsError}
+          onRefresh={refetchAlerts}
+          onInspectIngredient={(id) => {
+            setSelectedIngredientId(id);
+            setActiveTab('demand');
+          }}
+        />
       )}
 
       {/* DIALOG 1: ADD STOCK (RESTOCK) */}
@@ -250,7 +219,18 @@ export default function App() {
         onError={(err) => showToast(err, true)}
       />
 
-      {/* DIALOG 3: NEW REAGENT MODAL */}
+      {/* DIALOG 3: CURSE MODE CONFIGURATION FLOW DIALOG */}
+      <CurseConfigDialog
+        isOpen={isCurseModalOpen}
+        onClose={() => setCurseModalOpen(false)}
+        availableIngredients={restockItems || []}
+        onCurseActivated={() => {
+          showToast("Midnight Demand Curse summoned! All pantry prophecies amplified.");
+          refreshAll();
+        }}
+      />
+
+      {/* DIALOG 4: NEW REAGENT MODAL */}
       {newReagentOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 animate-in fade-in duration-200">
           <div className="w-full max-w-sm rounded-2xl border border-surface-border bg-surface p-6 shadow-2xl">

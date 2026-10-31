@@ -670,3 +670,4 @@ export const IngredientDetailView: React.FC<IngredientDetailViewProps> = ({
 };
 
 export default IngredientDetailView;
+
