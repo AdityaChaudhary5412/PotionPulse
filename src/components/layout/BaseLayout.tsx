@@ -46,6 +46,13 @@ export const BaseLayout: React.FC<BaseLayoutProps> = ({
       desc: 'Pantry stock & depletion'
     },
     {
+      id: 'landing',
+      label: 'Shader Hero Template',
+      shortLabel: 'Front Page',
+      icon: Sparkles,
+      desc: '21st.dev animated WebGL hero'
+    },
+    {
       id: 'inventory',
       label: 'Inventory Ledger',
       shortLabel: 'Ledger',
@@ -77,6 +84,7 @@ export const BaseLayout: React.FC<BaseLayoutProps> = ({
         alertCount={alertCount}
         onNavigateAlerts={onNavigateAlerts}
         onOpenCurseModal={onOpenCurseModal}
+        onNavigateLanding={() => onTabChange?.('landing')}
       />
 
       <div className="flex-1 flex w-full mx-auto max-w-7xl">

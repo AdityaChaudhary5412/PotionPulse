@@ -12,6 +12,7 @@ import AddStockDialog from './components/modals/AddStockDialog';
 import RecordSaleDialog from './components/modals/RecordSaleDialog';
 import CurseConfigDialog from './components/modals/CurseConfigDialog';
 import EmergentAgentBar from './components/agent/EmergentAgentBar';
+import FrontPage from './components/landing/FrontPage';
 import { Sparkles, AlertOctagon, X, Plus } from 'lucide-react';
 
 export default function App() {
@@ -101,6 +102,19 @@ export default function App() {
   };
 
   const alertCount = summary?.alerts_today ?? alerts?.length ?? 0;
+
+  // 21ST.DEV ANIMATED SHADER HERO FRONT PAGE
+  if (activeTab === 'landing') {
+    return (
+      <FrontPage
+        onEnterApp={() => setActiveTab('dashboard')}
+        onExploreFeatures={() => setActiveTab('demand')}
+        onQuickSearch={() => {
+          setActiveTab('inventory');
+        }}
+      />
+    );
+  }
 
   return (
     <BaseLayout

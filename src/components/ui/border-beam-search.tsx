@@ -255,3 +255,4 @@ export const BorderBeamSearch: React.FC<BorderBeamSearchProps> = ({
 };
 
 export default BorderBeamSearch;
+

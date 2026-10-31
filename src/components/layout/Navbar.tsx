@@ -12,6 +12,7 @@ interface NavbarProps {
   onNavigateAlerts?: () => void;
   onOpenCurseModal?: () => void;
   onQuickSearchClick?: () => void;
+  onNavigateLanding?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -19,7 +20,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   alertCount = 0,
   onNavigateAlerts,
   onOpenCurseModal,
-  onQuickSearchClick
+  onQuickSearchClick,
+  onNavigateLanding
 }) => {
   const {
     isCurseMode,
@@ -97,15 +99,19 @@ export const Navbar: React.FC<NavbarProps> = ({
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between gap-3 sm:gap-4">
           {/* Emergent Minimalist Logo & Workspace Breadcrumbs */}
-          <div className="flex items-center gap-3">
-            <div className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-surface-subtle to-surface border border-white/15 p-2 shadow-sm flex-shrink-0">
-              <Sparkles className="h-4 w-4 text-emergent-cyan" />
+          <div 
+            onClick={onNavigateLanding}
+            className="flex items-center gap-3 cursor-pointer group"
+            title="View 21st.dev Animated Shader Hero Front Page"
+          >
+            <div className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-surface-subtle to-surface border border-white/15 p-2 shadow-sm flex-shrink-0 group-hover:border-orange-400/50 transition-all">
+              <Sparkles className="h-4 w-4 text-emergent-cyan group-hover:text-yellow-300 transition-colors" />
               <div className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-emergent-green ring-2 ring-background animate-pulse" />
             </div>
             
             <div className="flex items-center gap-2">
               <div className="flex items-center gap-1.5">
-                <span className="font-sans text-base font-bold tracking-tight text-white">
+                <span className="font-sans text-base font-bold tracking-tight text-white group-hover:text-orange-200 transition-colors">
                   PotionPulse
                 </span>
                 <span className="text-gray-500 font-mono text-xs hidden sm:inline">/</span>
