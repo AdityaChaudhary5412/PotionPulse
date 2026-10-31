@@ -173,3 +173,4 @@ export const ShaderAnimation: React.FC<ShaderAnimationProps> = ({
 };
 
 export default ShaderAnimation;
+

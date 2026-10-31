@@ -88,3 +88,4 @@ export const ShaderAnimationDemo: React.FC<{
 };
 
 export default ShaderAnimationDemo;
+
