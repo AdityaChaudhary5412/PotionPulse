@@ -1,5 +1,6 @@
 import React from 'react';
 import Navbar from './Navbar';
+import BottomNav from './BottomNav';
 import { useCurse } from '../../context/CurseContext';
 
 interface BaseLayoutProps {
@@ -38,9 +39,9 @@ export const BaseLayout: React.FC<BaseLayoutProps> = ({
         onOpenCurseModal={onOpenCurseModal}
       />
 
-      {/* Navigation Sub-bar */}
+      {/* Desktop / Tablet Sub-Navbar (hidden on mobile small screens in favor of BottomNav) */}
       {onTabChange && (
-        <nav className="border-b border-surface-border bg-surface/60 backdrop-blur sticky top-16 z-40">
+        <nav className="hidden sm:block border-b border-surface-border bg-surface/60 backdrop-blur sticky top-16 z-40">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="flex space-x-1 sm:space-x-2 overflow-x-auto py-2 no-scrollbar">
               {tabs.map((tab) => {
@@ -70,19 +71,28 @@ export const BaseLayout: React.FC<BaseLayoutProps> = ({
         </nav>
       )}
 
-      {/* Main Content Area - Mobile-First Responsive */}
-      <main className="flex-1 w-full mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
+      {/* Main Content Area - Mobile-First Responsive (with pb-20 on mobile for BottomNav) */}
+      <main className="flex-1 w-full mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 pb-24 sm:pb-8">
         {children}
       </main>
 
+      {/* MOBILE BOTTOM NAVIGATION (appears exclusively on small screens) */}
+      {onTabChange && (
+        <BottomNav
+          activeTab={activeTab}
+          onTabChange={onTabChange}
+          alertCount={alertCount}
+        />
+      )}
+
       {/* Subtle Dark Footer */}
-      <footer className="border-t border-surface-border bg-surface/40 py-4 mt-auto">
+      <footer className="hidden sm:block border-t border-surface-border bg-surface/40 py-4 mt-auto">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-500">
           <div className="flex items-center gap-2">
             <div className="h-2 w-2 rounded-full bg-emerald-400" />
-            <span>FastAPI SQLite Engine Active</span>
+            <span>FastAPI SQLite & Postgres Engine</span>
             <span className="text-gray-600">|</span>
-            <span>LightGBM & Baseline Prophecy</span>
+            <span>Capacitor Mobile Ready</span>
           </div>
           <div className="flex items-center gap-4">
             <span className="text-gray-400">Track 1: The Witch's Potion Pantry</span>

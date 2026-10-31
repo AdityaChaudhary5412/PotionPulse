@@ -302,3 +302,4 @@ export const CurseConfigDialog: React.FC<CurseConfigDialogProps> = ({
 };
 
 export default CurseConfigDialog;
+

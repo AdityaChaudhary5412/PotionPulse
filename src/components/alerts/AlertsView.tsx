@@ -330,3 +330,4 @@ export const AlertsView: React.FC<AlertsViewProps> = ({
 };
 
 export default AlertsView;
+
