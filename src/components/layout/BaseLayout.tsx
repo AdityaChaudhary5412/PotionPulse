@@ -19,11 +19,10 @@ export const BaseLayout: React.FC<BaseLayoutProps> = ({
   const { isCurseMode } = useCurse();
 
   const tabs = [
-    { id: 'shelves', label: 'Pantry Shelves', icon: '🧪' },
+    { id: 'dashboard', label: 'Dashboard', icon: '✨' },
+    { id: 'inventory', label: 'Inventory Ledger', icon: '📦' },
     { id: 'demand', label: 'Demand Prophecy', icon: '🔮' },
-    { id: 'restock', label: 'Restock Spells', icon: '📜' },
     { id: 'anomalies', label: 'Strange Happenings', icon: '💀' },
-    { id: 'movements', label: 'Transaction Grimoire', icon: '📖' },
   ];
 
   return (
@@ -83,3 +82,4 @@ export const BaseLayout: React.FC<BaseLayoutProps> = ({
 };
 
 export default BaseLayout;
+
