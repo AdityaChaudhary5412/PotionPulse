@@ -37,7 +37,7 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
           <span>{value} / {max}</span>
         </div>
       )}
-      <div className={`w-full overflow-hidden rounded-full bg-surface-subtle border border-surface-border/40 ${heightClass}`}>
+      <div className={`w-full overflow-hidden rounded-full bg-white/[0.08] border border-white/[0.06] ${heightClass}`}>
         <div
           className={`${heightClass} rounded-full transition-all duration-500 ease-out ${barColor} shadow-sm ${glowColor}`}
           style={{ width: `${percentage}%` }}

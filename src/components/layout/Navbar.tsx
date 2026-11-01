@@ -182,7 +182,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
             {/* 4. User Profile or Log In / Sign Up */}
             {currentUser ? (
-              <div className="flex items-center gap-2 px-2.5 py-1 rounded-xl border border-white/10 bg-white/[0.04] text-xs">
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-white/10 bg-white/[0.04] text-xs">
                 {currentUser.avatar ? (
                   <img src={currentUser.avatar} alt="Avatar" className="w-5 h-5 rounded-full object-cover" />
                 ) : (
@@ -190,7 +190,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                     {currentUser.name ? currentUser.name[0].toUpperCase() : 'U'}
                   </div>
                 )}
-                <span className="text-gray-200 font-medium max-w-[100px] truncate hidden md:inline">
+                <span className="text-gray-200 font-medium max-w-[140px] truncate hidden md:inline">
                   {currentUser.name || currentUser.email}
                 </span>
                 {onSignOut && (
