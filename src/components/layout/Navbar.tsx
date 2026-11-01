@@ -1,7 +1,7 @@
 import React from 'react';
 import { useCurse } from '../../context/CurseContext';
 import {
-  Sparkles, Flame, Database, RefreshCw, Zap, Bell, Sliders, XCircle, Search, Terminal, User
+  Sparkles, Flame, Database, RefreshCw, Zap, Bell, Sliders, XCircle, Search, Terminal, User, LogOut
 } from 'lucide-react';
 import api from '../../services/api';
 import BorderBeamSearch from '../ui/border-beam-search';
@@ -15,6 +15,8 @@ interface NavbarProps {
   onQuickSearchClick?: () => void;
   onNavigateLanding?: () => void;
   onNavigateAuth?: () => void;
+  currentUser?: any;
+  onSignOut?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -24,7 +26,9 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenCurseModal,
   onQuickSearchClick,
   onNavigateLanding,
-  onNavigateAuth
+  onNavigateAuth,
+  currentUser,
+  onSignOut
 }) => {
   const {
     isCurseMode,
@@ -201,17 +205,39 @@ export const Navbar: React.FC<NavbarProps> = ({
               </button>
             </div>
 
-            {/* 5. User Log In / Sign Up */}
-            {onNavigateAuth && (
+            {/* 5. User Profile or Log In / Sign Up */}
+            {currentUser ? (
+              <div className="flex items-center gap-2 px-2.5 py-1 rounded-xl border border-white/10 bg-white/[0.04] text-xs">
+                {currentUser.avatar ? (
+                  <img src={currentUser.avatar} alt="Avatar" className="w-5 h-5 rounded-full object-cover" />
+                ) : (
+                  <div className="w-5 h-5 rounded-full bg-orange-500/20 text-orange-300 font-bold flex items-center justify-center text-[10px]">
+                    {currentUser.name ? currentUser.name[0].toUpperCase() : 'U'}
+                  </div>
+                )}
+                <span className="text-gray-200 font-medium max-w-[100px] truncate hidden md:inline">
+                  {currentUser.name || currentUser.email}
+                </span>
+                {onSignOut && (
+                  <button
+                    onClick={onSignOut}
+                    title="Sign Out"
+                    className="p-1 text-gray-400 hover:text-red-400 transition-colors ml-1 cursor-pointer"
+                  >
+                    <LogOut className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+            ) : onNavigateAuth ? (
               <button
                 onClick={onNavigateAuth}
                 title="Account / Sign In"
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-white/10 bg-white/[0.04] text-xs font-medium text-gray-200 hover:bg-white/[0.08] hover:border-white/20 hover:text-white transition-all"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-white/10 bg-white/[0.04] text-xs font-medium text-gray-200 hover:bg-white/[0.08] hover:border-white/20 hover:text-white transition-all cursor-pointer"
               >
                 <User className="w-3.5 h-3.5 text-orange-400" />
                 <span className="hidden md:inline">Sign In</span>
               </button>
-            )}
+            ) : null}
           </div>
         </div>
       </div>

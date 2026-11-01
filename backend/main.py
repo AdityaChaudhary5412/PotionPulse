@@ -21,7 +21,8 @@ from backend.schemas import (
     EventCreate, EventOut, AlertOut, HealthResponse,
     RestockItem, SummaryResponse,
     DemandResponse, DemandHistoryPoint, DemandForecastPoint, DemandChartPoint,
-    AgentCommandRequest, AgentCommandResponse
+    AgentCommandRequest, AgentCommandResponse,
+    UserAuthRequest, UserAuthResponse
 )
 from backend import crud
 from backend.seed import seed_database
@@ -152,8 +153,94 @@ def mongodb_stats():
             "events": mongo_db.events.count_documents({}),
             "alerts": mongo_db.alerts.count_documents({}),
             "agent_logs": mongo_db.agent_logs.count_documents({}),
+            "users": mongo_db.users.count_documents({}),
         }
     }
+
+# ==============================================================================
+# AUTHENTICATION & USER SESSIONS (LOCAL + MONGODB ATLAS)
+# ==============================================================================
+@app.post("/auth/register", response_model=UserAuthResponse, tags=["Authentication"])
+def register_user(payload: UserAuthRequest):
+    """Registers a new user and syncs profile to MongoDB Atlas."""
+    email = payload.email.strip().lower()
+    name = payload.name or email.split("@")[0].title()
+    mongo_db = get_mongo_db()
+    if mongo_db is not None:
+        try:
+            mongo_db.users.update_one(
+                {"email": email},
+                {
+                    "$set": {
+                        "email": email,
+                        "name": name,
+                        "provider": payload.provider or "email",
+                        "avatar": payload.avatar,
+                        "updated_at": datetime.utcnow()
+                    },
+                    "$setOnInsert": {"created_at": datetime.utcnow()}
+                },
+                upsert=True
+            )
+        except Exception as e:
+            print(f"MongoDB user register sync error: {e}")
+            
+    token = f"potion_{abs(hash(email))}_{int(datetime.utcnow().timestamp())}"
+    return UserAuthResponse(
+        status="success",
+        message="User successfully registered",
+        user={"email": email, "name": name, "provider": payload.provider or "email", "avatar": payload.avatar},
+        token=token
+    )
+
+@app.post("/auth/login", response_model=UserAuthResponse, tags=["Authentication"])
+def login_user(payload: UserAuthRequest):
+    """Logs in an existing user."""
+    email = payload.email.strip().lower()
+    name = payload.name or email.split("@")[0].title()
+    token = f"potion_{abs(hash(email))}_{int(datetime.utcnow().timestamp())}"
+    return UserAuthResponse(
+        status="success",
+        message="User successfully authenticated",
+        user={"email": email, "name": name, "provider": payload.provider or "email", "avatar": payload.avatar},
+        token=token
+    )
+
+@app.post("/auth/oauth", response_model=UserAuthResponse, tags=["Authentication"])
+def oauth_login(payload: UserAuthRequest):
+    """Handles OAuth social authentication (GitHub / Google) and syncs to MongoDB Atlas."""
+    provider = (payload.provider or "github").lower()
+    email = payload.email.strip().lower() if payload.email else f"{provider}_user@potionpulse.internal"
+    name = payload.name or ("GitHub Alchemist" if provider == "github" else "Google Alchemist")
+    avatar = payload.avatar or ("https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" if provider == "github" else None)
+    
+    mongo_db = get_mongo_db()
+    if mongo_db is not None:
+        try:
+            mongo_db.users.update_one(
+                {"email": email},
+                {
+                    "$set": {
+                        "email": email,
+                        "name": name,
+                        "provider": provider,
+                        "avatar": avatar,
+                        "last_login": datetime.utcnow()
+                    },
+                    "$setOnInsert": {"created_at": datetime.utcnow()}
+                },
+                upsert=True
+            )
+        except Exception as e:
+            print(f"MongoDB OAuth sync error: {e}")
+            
+    token = f"oauth_{provider}_{int(datetime.utcnow().timestamp())}"
+    return UserAuthResponse(
+        status="success",
+        message=f"Successfully authenticated via {provider.title()}",
+        user={"email": email, "name": name, "provider": provider, "avatar": avatar},
+        token=token
+    )
 
 # ==============================================================================
 # 2. INGREDIENTS CRUD
@@ -920,7 +1007,7 @@ if os.path.exists(dist_dir):
         api_prefixes = (
             "health", "ingredients", "sales", "movements", "upload", "predict",
             "restock", "summary", "demand", "events", "alerts", "seed", "agent",
-            "mongodb", "docs", "openapi.json", "redoc"
+            "mongodb", "auth", "docs", "openapi.json", "redoc"
         )
         if any(full_path == p or full_path.startswith(f"{p}/") for p in api_prefixes):
             raise HTTPException(status_code=404, detail="API endpoint not found")

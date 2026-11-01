@@ -27,6 +27,7 @@ export default defineConfig({
       '/seed': 'http://127.0.0.1:8000',
       '/agent': 'http://127.0.0.1:8000',
       '/mongodb': 'http://127.0.0.1:8000',
+      '/auth': 'http://127.0.0.1:8000',
     },
   },
 })

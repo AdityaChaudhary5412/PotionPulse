@@ -56,6 +56,22 @@ export default function App() {
   const [selectedIngredientId, setSelectedIngredientId] = useState<number>(1);
   const [toast, setToast] = useState<{ msg: string; isErr?: boolean } | null>(null);
 
+  // User Authentication State
+  const [currentUser, setCurrentUser] = useState<any>(() => {
+    try {
+      const saved = localStorage.getItem('potionpulse_user');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
+
+  const handleSignOut = () => {
+    localStorage.removeItem('potionpulse_user');
+    setCurrentUser(null);
+    showToast('Signed out of PotionPulse');
+  };
+
   // Dialog State
   const [stockItem, setStockItem] = useState<RestockItem | null>(null);
   const [saleItem, setSaleItem] = useState<RestockItem | null>(null);
@@ -158,11 +174,12 @@ export default function App() {
       <AuthComponent
         logo={<PotionPulseLogo size="sm" />}
         brandName="PotionPulse"
-        onSuccess={() => {
-          showToast('Welcome to PotionPulse! Account authenticated.');
+        onSuccess={(user) => {
+          if (user) setCurrentUser(user);
+          showToast(`Welcome, ${user?.name || 'Alchemist'}! Authenticated successfully.`);
           setActiveTab('dashboard');
         }}
-        onClose={() => setActiveTab('landing')}
+        onClose={() => setActiveTab('dashboard')}
       />
     );
   }
@@ -175,6 +192,8 @@ export default function App() {
       alertCount={alertCount}
       onNavigateAlerts={() => setActiveTab('anomalies')}
       onOpenCurseModal={() => setCurseModalOpen(true)}
+      currentUser={currentUser}
+      onSignOut={handleSignOut}
     >
       {/* Emergent Toast Notification */}
       {toast && (

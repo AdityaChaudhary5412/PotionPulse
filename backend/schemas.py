@@ -159,5 +159,18 @@ class AgentCommandResponse(BaseModel):
     suggestions: List[str]
     data: Optional[dict] = None
 
+class UserAuthRequest(BaseModel):
+    email: str
+    password: Optional[str] = None
+    provider: Optional[str] = "email"
+    name: Optional[str] = None
+    avatar: Optional[str] = None
+
+class UserAuthResponse(BaseModel):
+    status: str
+    message: str
+    user: Dict[str, Any]
+    token: str
+
 
 

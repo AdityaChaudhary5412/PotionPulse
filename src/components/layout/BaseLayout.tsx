@@ -23,6 +23,8 @@ interface BaseLayoutProps {
   alertCount?: number;
   onNavigateAlerts?: () => void;
   onOpenCurseModal?: () => void;
+  currentUser?: any;
+  onSignOut?: () => void;
 }
 
 export const BaseLayout: React.FC<BaseLayoutProps> = ({
@@ -32,7 +34,9 @@ export const BaseLayout: React.FC<BaseLayoutProps> = ({
   onTabChange,
   alertCount = 0,
   onNavigateAlerts,
-  onOpenCurseModal
+  onOpenCurseModal,
+  currentUser,
+  onSignOut
 }) => {
   const { isCurseMode, curseMultiplier, toggleCurseMode, setCurseModalOpen } = useCurse();
 
@@ -78,6 +82,8 @@ export const BaseLayout: React.FC<BaseLayoutProps> = ({
         onOpenCurseModal={onOpenCurseModal}
         onNavigateLanding={() => onTabChange?.('landing')}
         onNavigateAuth={() => onTabChange?.('auth')}
+        currentUser={currentUser}
+        onSignOut={onSignOut}
       />
 
       <div className="flex-1 flex w-full mx-auto max-w-7xl">
