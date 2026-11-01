@@ -7,7 +7,6 @@ import {
   Boxes,
   TrendingUp,
   AlertTriangle,
-  Sparkles,
   Command,
   Zap,
   Sliders,
@@ -44,13 +43,6 @@ export const BaseLayout: React.FC<BaseLayoutProps> = ({
       shortLabel: 'Dashboard',
       icon: LayoutDashboard,
       desc: 'Pantry stock & depletion'
-    },
-    {
-      id: 'landing',
-      label: 'Shader Hero Template',
-      shortLabel: 'Front Page',
-      icon: Sparkles,
-      desc: '21st.dev animated WebGL hero'
     },
     {
       id: 'inventory',
