@@ -105,3 +105,4 @@ export const PotionPulseLogo: React.FC<PotionPulseLogoProps> = ({
 };
 
 export default PotionPulseLogo;
+

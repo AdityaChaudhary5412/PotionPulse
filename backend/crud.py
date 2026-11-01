@@ -5,6 +5,40 @@ from typing import Optional, List
 from backend.models import Ingredient, Movement, Alert, Event
 from backend.schemas import IngredientCreate, IngredientUpdate, SaleCreate, StockChange
 
+def _mongo_sync_ingredient(item: Ingredient):
+    try:
+        from backend.mongodb import sync_ingredient_to_mongo
+        sync_ingredient_to_mongo({
+            "id": item.id,
+            "name": item.name,
+            "unit": item.unit,
+            "current_stock": item.current_stock,
+            "lead_time_days": item.lead_time_days,
+        })
+    except Exception:
+        pass
+
+def _mongo_delete_ingredient(item_id: int):
+    try:
+        from backend.mongodb import delete_ingredient_from_mongo
+        delete_ingredient_from_mongo(item_id)
+    except Exception:
+        pass
+
+def _mongo_sync_movement(mv: Movement):
+    try:
+        from backend.mongodb import sync_movement_to_mongo
+        sync_movement_to_mongo({
+            "id": mv.id,
+            "ingredient_id": mv.ingredient_id,
+            "type": mv.type,
+            "qty": mv.qty,
+            "note": getattr(mv, "note", ""),
+            "ts": getattr(mv, "ts", getattr(mv, "timestamp", datetime.utcnow())),
+        })
+    except Exception:
+        pass
+
 def get_ingredient(db: Session, ingredient_id: int) -> Optional[Ingredient]:
     return db.query(Ingredient).filter(Ingredient.id == ingredient_id).first()
 
@@ -36,7 +70,10 @@ def create_ingredient(db: Session, data: IngredientCreate) -> Ingredient:
         )
         db.add(mv)
         db.commit()
+        db.refresh(mv)
+        _mongo_sync_movement(mv)
 
+    _mongo_sync_ingredient(db_item)
     return db_item
 
 def update_ingredient(db: Session, ingredient_id: int, data: IngredientUpdate) -> Optional[Ingredient]:
@@ -59,11 +96,15 @@ def update_ingredient(db: Session, ingredient_id: int, data: IngredientUpdate) -
             note="Manual stock correction"
         )
         db.add(mv)
+        db.commit()
+        db.refresh(mv)
+        _mongo_sync_movement(mv)
     if data.lead_time_days is not None:
         db_item.lead_time_days = data.lead_time_days
 
     db.commit()
     db.refresh(db_item)
+    _mongo_sync_ingredient(db_item)
     return db_item
 
 def delete_ingredient(db: Session, ingredient_id: int) -> bool:
@@ -72,6 +113,7 @@ def delete_ingredient(db: Session, ingredient_id: int) -> bool:
         return False
     db.delete(db_item)
     db.commit()
+    _mongo_delete_ingredient(ingredient_id)
     return True
 
 def record_sale(db: Session, sale: SaleCreate) -> Movement:
@@ -121,6 +163,8 @@ def record_sale(db: Session, sale: SaleCreate) -> Movement:
 
     db.commit()
     db.refresh(mv)
+    _mongo_sync_ingredient(ingredient)
+    _mongo_sync_movement(mv)
     return mv
 
 def update_ingredient_stock(db: Session, ingredient_id: int, stock_change: StockChange) -> Movement:
@@ -149,5 +193,7 @@ def update_ingredient_stock(db: Session, ingredient_id: int, stock_change: Stock
     db.add(mv)
     db.commit()
     db.refresh(mv)
+    _mongo_sync_ingredient(ingredient)
+    _mongo_sync_movement(mv)
     return mv
 

@@ -13,7 +13,7 @@ import pandas as pd
 import numpy as np
 import json
 
-from backend.database import engine, Base, get_db
+from backend.database import engine, Base, get_db, SessionLocal
 from backend.models import Ingredient, Movement, Event, Alert
 from backend.schemas import (
     IngredientCreate, IngredientUpdate, IngredientOut,
@@ -26,6 +26,9 @@ from backend.schemas import (
 from backend import crud
 from backend.seed import seed_database
 from backend.agent_engine import EmergentAgentEngine
+from backend.mongodb import (
+    init_mongo_indexes, check_mongo_health, sync_all_sql_to_mongo, get_mongo_db
+)
 from backend.data_cleaner import (
     resolve_column, COLUMN_ALIASES, load_and_clean,
     parse_flexible_dates, sanitize_quantities,
@@ -81,6 +84,20 @@ else:
         allow_headers=["*"],
     )
 
+# Startup Event: Initialize MongoDB & Sync Data
+@app.on_event("startup")
+def on_startup():
+    try:
+        init_mongo_indexes()
+        # Seed or sync if needed
+        db = SessionLocal()
+        try:
+            sync_all_sql_to_mongo(db)
+        finally:
+            db.close()
+    except Exception as e:
+        print(f"Startup MongoDB notice: {e}")
+
 # ==============================================================================
 # 1. SYSTEM HEALTH
 # ==============================================================================
@@ -91,14 +108,52 @@ def health_check(db: Session = Depends(get_db)):
     total_movements = db.query(Movement).count()
     active_alerts = db.query(Alert).count()
 
+    mongo_health = check_mongo_health()
+    db_status = "sqlite connected"
+    if mongo_health.get("status") == "connected":
+        db_status = "sqlite + mongodb atlas connected"
+
     return HealthResponse(
         status="healthy",
-        database="sqlite connected",
+        database=db_status,
         timestamp=datetime.utcnow(),
         total_ingredients=total_ingredients,
         total_movements=total_movements,
-        active_alerts=active_alerts
+        active_alerts=active_alerts,
+        mongodb=mongo_health
     )
+
+# ==============================================================================
+# MONGODB ATLAS ENDPOINTS
+# ==============================================================================
+@app.get("/mongodb/health", tags=["MongoDB"])
+def mongodb_health():
+    """Returns MongoDB Atlas connection status, server version, and collections."""
+    return check_mongo_health()
+
+@app.post("/mongodb/sync", tags=["MongoDB"])
+def mongodb_sync_all(db: Session = Depends(get_db)):
+    """Synchronizes all SQLite ingredients, movements, events, and alerts to MongoDB Atlas."""
+    return sync_all_sql_to_mongo(db)
+
+@app.get("/mongodb/stats", tags=["MongoDB"])
+def mongodb_stats():
+    """Returns document counts for all MongoDB Atlas collections."""
+    mongo_db = get_mongo_db()
+    if mongo_db is None:
+        raise HTTPException(status_code=503, detail="MongoDB Atlas is not connected.")
+    
+    return {
+        "cluster": "cluster0.e01dabt.mongodb.net",
+        "database": mongo_db.name,
+        "collections": {
+            "ingredients": mongo_db.ingredients.count_documents({}),
+            "movements": mongo_db.movements.count_documents({}),
+            "events": mongo_db.events.count_documents({}),
+            "alerts": mongo_db.alerts.count_documents({}),
+            "agent_logs": mongo_db.agent_logs.count_documents({}),
+        }
+    }
 
 # ==============================================================================
 # 2. INGREDIENTS CRUD
@@ -865,7 +920,7 @@ if os.path.exists(dist_dir):
         api_prefixes = (
             "health", "ingredients", "sales", "movements", "upload", "predict",
             "restock", "summary", "demand", "events", "alerts", "seed", "agent",
-            "docs", "openapi.json", "redoc"
+            "mongodb", "docs", "openapi.json", "redoc"
         )
         if any(full_path == p or full_path.startswith(f"{p}/") for p in api_prefixes):
             raise HTTPException(status_code=404, detail="API endpoint not found")

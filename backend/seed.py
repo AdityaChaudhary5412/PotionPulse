@@ -103,6 +103,14 @@ def seed_database(csv_path: str = "backend/sample_sales.csv"):
         db.commit()
         print("✅ Seeded events and initial risk alerts.")
 
+        # 4. Sync initial seed state to MongoDB Atlas
+        try:
+            from backend.mongodb import sync_all_sql_to_mongo
+            synced = sync_all_sql_to_mongo(db)
+            print(f"☁️ Synced to MongoDB Atlas: {synced}")
+        except Exception as e:
+            print(f"⚠️ MongoDB Atlas sync notice: {e}")
+
     finally:
         db.close()
 

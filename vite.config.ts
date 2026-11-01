@@ -26,6 +26,7 @@ export default defineConfig({
       '/alerts': 'http://127.0.0.1:8000',
       '/seed': 'http://127.0.0.1:8000',
       '/agent': 'http://127.0.0.1:8000',
+      '/mongodb': 'http://127.0.0.1:8000',
     },
   },
 })

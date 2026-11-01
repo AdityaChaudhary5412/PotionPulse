@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 from datetime import datetime
 
 # Ingredient Schemas
@@ -121,6 +121,7 @@ class HealthResponse(BaseModel):
     total_ingredients: int
     total_movements: int
     active_alerts: int
+    mongodb: Optional[Dict[str, Any]] = None
 
 # Restock & Inventory Intelligence Schemas
 class RestockItem(BaseModel):
