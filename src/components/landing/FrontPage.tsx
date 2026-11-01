@@ -1,6 +1,5 @@
 import React from 'react';
 import { AnimatedShaderHero } from '../ui/animated-shader-hero';
-import BorderBeamSearch from '../ui/border-beam-search';
 import PotionPulseLogo from '../ui/PotionPulseLogo';
 import {
   Sparkles,
@@ -83,20 +82,7 @@ export const FrontPage: React.FC<FrontPageProps> = ({
             },
           },
         }}
-      >
-        <div className="w-full max-w-md mx-auto mt-2">
-          <BorderBeamSearch
-            placeholder="Search spells, bat wings, stockout prophecies..."
-            onSubmit={(val) => {
-              if (onQuickSearch) onQuickSearch(val);
-              onEnterApp();
-            }}
-            width="100%"
-            height={44}
-            borderRadius={64}
-          />
-        </div>
-      </AnimatedShaderHero>
+      />
 
       {/* 3. Capabilities Grid */}
       <section id="features" className="relative z-20 py-16 px-4 sm:px-12 max-w-7xl mx-auto border-t border-white/10">
