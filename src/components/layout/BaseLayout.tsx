@@ -77,6 +77,7 @@ export const BaseLayout: React.FC<BaseLayoutProps> = ({
         onNavigateAlerts={onNavigateAlerts}
         onOpenCurseModal={onOpenCurseModal}
         onNavigateLanding={() => onTabChange?.('landing')}
+        onNavigateAuth={() => onTabChange?.('auth')}
       />
 
       <div className="flex-1 flex w-full mx-auto max-w-7xl">

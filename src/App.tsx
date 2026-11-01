@@ -13,6 +13,8 @@ import RecordSaleDialog from './components/modals/RecordSaleDialog';
 import CurseConfigDialog from './components/modals/CurseConfigDialog';
 import EmergentAgentBar from './components/agent/EmergentAgentBar';
 import FrontPage from './components/landing/FrontPage';
+import { AuthComponent } from './components/ui/sign-up';
+import PotionPulseLogo from './components/ui/PotionPulseLogo';
 import { Sparkles, AlertOctagon, X, Plus } from 'lucide-react';
 
 export default function App() {
@@ -20,12 +22,12 @@ export default function App() {
   const [activeTab, setActiveTabState] = useState<string>(() => {
     if (typeof window !== 'undefined') {
       const hash = window.location.hash.replace('#', '');
-      if (['landing', 'dashboard', 'inventory', 'demand', 'anomalies'].includes(hash)) {
+      if (['landing', 'dashboard', 'inventory', 'demand', 'anomalies', 'auth'].includes(hash)) {
         return hash;
       }
       const params = new URLSearchParams(window.location.search);
       const tabParam = params.get('tab');
-      if (tabParam && ['landing', 'dashboard', 'inventory', 'demand', 'anomalies'].includes(tabParam)) {
+      if (tabParam && ['landing', 'dashboard', 'inventory', 'demand', 'anomalies', 'auth'].includes(tabParam)) {
         return tabParam;
       }
     }
@@ -42,7 +44,7 @@ export default function App() {
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash.replace('#', '');
-      if (hash && ['landing', 'dashboard', 'inventory', 'demand', 'anomalies'].includes(hash)) {
+      if (hash && ['landing', 'dashboard', 'inventory', 'demand', 'anomalies', 'auth'].includes(hash)) {
         setActiveTabState(hash);
       } else if (!hash) {
         setActiveTabState('landing');
@@ -142,9 +144,25 @@ export default function App() {
       <FrontPage
         onEnterApp={() => setActiveTab('dashboard')}
         onExploreFeatures={() => setActiveTab('demand')}
+        onNavigateAuth={() => setActiveTab('auth')}
         onQuickSearch={() => {
           setActiveTab('inventory');
         }}
+      />
+    );
+  }
+
+  // IMMERSIVE LOG IN & SIGN UP PAGE
+  if (activeTab === 'auth') {
+    return (
+      <AuthComponent
+        logo={<PotionPulseLogo size="sm" />}
+        brandName="PotionPulse"
+        onSuccess={() => {
+          showToast('Welcome to PotionPulse! Account authenticated.');
+          setActiveTab('dashboard');
+        }}
+        onClose={() => setActiveTab('landing')}
       />
     );
   }

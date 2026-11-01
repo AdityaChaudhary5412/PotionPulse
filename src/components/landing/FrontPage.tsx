@@ -20,12 +20,14 @@ interface FrontPageProps {
   onEnterApp: () => void;
   onExploreFeatures?: () => void;
   onQuickSearch?: (query: string) => void;
+  onNavigateAuth?: () => void;
 }
 
 export const FrontPage: React.FC<FrontPageProps> = ({
   onEnterApp,
   onExploreFeatures,
   onQuickSearch,
+  onNavigateAuth,
 }) => {
   return (
     <div className="w-full bg-[#07050a] text-white selection:bg-orange-500/30 selection:text-white">
@@ -48,6 +50,15 @@ export const FrontPage: React.FC<FrontPageProps> = ({
         </div>
 
         <div className="flex items-center gap-3">
+          {onNavigateAuth && (
+            <button
+              type="button"
+              onClick={onNavigateAuth}
+              className="flex items-center gap-1.5 px-4 py-2 bg-white/10 hover:bg-white/15 text-white font-medium text-xs sm:text-sm rounded-full transition-all duration-300 border border-white/15 hover:border-white/30 backdrop-blur-md"
+            >
+              <span>Log In / Sign Up</span>
+            </button>
+          )}
           <button
             type="button"
             onClick={onEnterApp}

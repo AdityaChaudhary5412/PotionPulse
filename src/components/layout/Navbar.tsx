@@ -1,7 +1,7 @@
 import React from 'react';
 import { useCurse } from '../../context/CurseContext';
 import {
-  Sparkles, Flame, Database, RefreshCw, Zap, Bell, Sliders, XCircle, Search, Terminal
+  Sparkles, Flame, Database, RefreshCw, Zap, Bell, Sliders, XCircle, Search, Terminal, User
 } from 'lucide-react';
 import api from '../../services/api';
 import BorderBeamSearch from '../ui/border-beam-search';
@@ -14,6 +14,7 @@ interface NavbarProps {
   onOpenCurseModal?: () => void;
   onQuickSearchClick?: () => void;
   onNavigateLanding?: () => void;
+  onNavigateAuth?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -22,7 +23,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   onNavigateAlerts,
   onOpenCurseModal,
   onQuickSearchClick,
-  onNavigateLanding
+  onNavigateLanding,
+  onNavigateAuth
 }) => {
   const {
     isCurseMode,
@@ -198,6 +200,18 @@ export const Navbar: React.FC<NavbarProps> = ({
                 />
               </button>
             </div>
+
+            {/* 5. User Log In / Sign Up */}
+            {onNavigateAuth && (
+              <button
+                onClick={onNavigateAuth}
+                title="Account / Sign In"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-white/10 bg-white/[0.04] text-xs font-medium text-gray-200 hover:bg-white/[0.08] hover:border-white/20 hover:text-white transition-all"
+              >
+                <User className="w-3.5 h-3.5 text-orange-400" />
+                <span className="hidden md:inline">Sign In</span>
+              </button>
+            )}
           </div>
         </div>
       </div>
