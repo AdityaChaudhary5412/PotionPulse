@@ -1,6 +1,6 @@
 import React from 'react';
 import { PantrySummary } from '../../types';
-import { AlertTriangle, AlertOctagon, Bell, Clock, ShieldCheck } from 'lucide-react';
+import { AlertTriangle, AlertOctagon, Bell, Clock } from 'lucide-react';
 
 interface StatCardsProps {
   summary: PantrySummary | null;
@@ -10,7 +10,7 @@ interface StatCardsProps {
 export const StatCards: React.FC<StatCardsProps> = ({ summary, loading }) => {
   if (loading) {
     return (
-      <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-4 sm:gap-4 mb-8 animate-pulse">
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4 mb-6 animate-pulse">
         {[1, 2, 3, 4].map((i) => (
           <div key={i} className="h-28 rounded-2xl border border-white/5 bg-white/[0.02] p-4" />
         ))}
@@ -24,113 +24,70 @@ export const StatCards: React.FC<StatCardsProps> = ({ summary, loading }) => {
   const nearestDays = summary?.nearest_stockout_days;
 
   return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4 mb-8">
-      {/* 1. Low-Stock Items */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#161224]/80 via-[#120f1d]/80 to-[#181120]/80 border border-amber-500/20 p-5 shadow-lg backdrop-blur-xl hover:border-amber-400/40 transition-all group">
-        <div className="absolute -top-10 -right-10 w-28 h-28 rounded-full bg-amber-500/10 blur-2xl pointer-events-none group-hover:bg-amber-500/20 transition-all" />
+    <div className="grid grid-cols-2 gap-3.5 lg:grid-cols-4 mb-6">
+      {/* 1. Critical Stock */}
+      <div className="relative overflow-hidden rounded-2xl bg-[#110e1a]/70 border border-red-500/20 p-4 sm:p-5 backdrop-blur-xl hover:border-red-500/40 transition-all duration-300 group shadow-sm">
+        <div className="flex items-center justify-between text-xs font-medium text-gray-400">
+          <span>Critical Stock</span>
+          <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-red-500/15 text-red-400 border border-red-500/25">
+            <AlertOctagon className="w-3.5 h-3.5" />
+          </div>
+        </div>
+        <div className="mt-3 flex items-baseline gap-2">
+          <span className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">{criticalItems}</span>
+          <span className="text-xs text-red-300/80 font-medium">&le; 2 days buffer</span>
+        </div>
+        <p className="mt-1 text-[11px] text-gray-400 truncate">Immediate replenishment needed</p>
+      </div>
 
-        <div className="flex items-center justify-between">
-          <span className="text-[11px] font-bold tracking-wider text-amber-200/70 uppercase">
-            Low Stock
-          </span>
-          <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-300">
+      {/* 2. Low Stock Items */}
+      <div className="relative overflow-hidden rounded-2xl bg-[#110e1a]/70 border border-amber-500/20 p-4 sm:p-5 backdrop-blur-xl hover:border-amber-500/40 transition-all duration-300 group shadow-sm">
+        <div className="flex items-center justify-between text-xs font-medium text-gray-400">
+          <span>Low Stock</span>
+          <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-amber-500/15 text-amber-300 border border-amber-500/25">
             <AlertTriangle className="w-3.5 h-3.5" />
           </div>
         </div>
-
         <div className="mt-3 flex items-baseline gap-2">
-          <div className="text-3xl sm:text-4xl font-black tracking-tight text-white">
-            {lowStock}
-          </div>
-          <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30">
-            3-7 Days
-          </span>
+          <span className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">{lowStock}</span>
+          <span className="text-xs text-amber-300/80 font-medium">3-7 days buffer</span>
         </div>
-        <p className="mt-1.5 text-[11px] text-gray-400 font-medium">Reagents approaching threshold</p>
+        <p className="mt-1 text-[11px] text-gray-400 truncate">Approaching reorder threshold</p>
       </div>
 
-      {/* 2. Critical Items */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#1c101c]/80 via-[#150d18]/80 to-[#1b1016]/80 border border-red-500/25 p-5 shadow-lg backdrop-blur-xl hover:border-red-400/45 transition-all group">
-        <div className="absolute -top-10 -right-10 w-28 h-28 rounded-full bg-red-500/15 blur-2xl pointer-events-none group-hover:bg-red-500/25 transition-all" />
-
-        <div className="flex items-center justify-between">
-          <span className="text-[11px] font-bold tracking-wider text-red-300/80 uppercase">
-            Critical Stock
-          </span>
-          <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-red-500/20 border border-red-500/35 text-red-400">
-            <AlertOctagon className="w-3.5 h-3.5 animate-pulse" />
-          </div>
-        </div>
-
-        <div className="mt-3 flex items-baseline gap-2">
-          <div className="text-3xl sm:text-4xl font-black tracking-tight text-white">
-            {criticalItems}
-          </div>
-          <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded-full bg-red-500/20 text-red-300 border border-red-500/30 font-semibold">
-            &le; 2 Days
-          </span>
-        </div>
-        <p className="mt-1.5 text-[11px] text-gray-400 font-medium">Imminent stockout interruption</p>
-      </div>
-
-      {/* 3. Alerts Today */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#12152a]/80 via-[#0f1222]/80 to-[#141226]/80 border border-purple-500/20 p-5 shadow-lg backdrop-blur-xl hover:border-purple-400/40 transition-all group">
-        <div className="absolute -top-10 -right-10 w-28 h-28 rounded-full bg-purple-500/15 blur-2xl pointer-events-none group-hover:bg-purple-500/25 transition-all" />
-
-        <div className="flex items-center justify-between">
-          <span className="text-[11px] font-bold tracking-wider text-purple-200/70 uppercase">
-            Anomalies
-          </span>
-          <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-purple-500/15 border border-purple-500/30 text-purple-300">
+      {/* 3. Anomalies & Threats */}
+      <div className="relative overflow-hidden rounded-2xl bg-[#110e1a]/70 border border-purple-500/20 p-4 sm:p-5 backdrop-blur-xl hover:border-purple-500/40 transition-all duration-300 group shadow-sm">
+        <div className="flex items-center justify-between text-xs font-medium text-gray-400">
+          <span>Pantry Anomalies</span>
+          <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-purple-500/15 text-purple-300 border border-purple-500/25">
             <Bell className="w-3.5 h-3.5" />
           </div>
         </div>
-
         <div className="mt-3 flex items-baseline gap-2">
-          <div className="text-3xl sm:text-4xl font-black tracking-tight text-white">
-            {alertsToday}
-          </div>
-          <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded-full bg-purple-500/15 text-purple-300 border border-purple-500/30">
-            Audit Feed
-          </span>
+          <span className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">{alertsToday}</span>
+          <span className="text-xs text-purple-300/80 font-medium">Flagged spikes</span>
         </div>
-        <p className="mt-1.5 text-[11px] text-gray-400 font-medium">Z-score spikes & midnight leaks</p>
+        <p className="mt-1 text-[11px] text-gray-400 truncate">Consumption & leak forensics</p>
       </div>
 
-      {/* 4. Nearest Depletion in Days */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#0e1c1b]/80 via-[#0c1618]/80 to-[#101920]/80 border border-cyan-500/20 p-5 shadow-lg backdrop-blur-xl hover:border-cyan-400/40 transition-all group">
-        <div className="absolute -top-10 -right-10 w-28 h-28 rounded-full bg-cyan-500/15 blur-2xl pointer-events-none group-hover:bg-cyan-500/25 transition-all" />
-
-        <div className="flex items-center justify-between">
-          <span className="text-[11px] font-bold tracking-wider text-cyan-200/70 uppercase">
-            Nearest Depletion
-          </span>
-          <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-cyan-500/15 border border-cyan-500/30 text-cyan-300">
+      {/* 4. Nearest Depletion Countdown */}
+      <div className="relative overflow-hidden rounded-2xl bg-[#110e1a]/70 border border-cyan-500/20 p-4 sm:p-5 backdrop-blur-xl hover:border-cyan-500/40 transition-all duration-300 group shadow-sm">
+        <div className="flex items-center justify-between text-xs font-medium text-gray-400">
+          <span>Nearest Depletion</span>
+          <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-cyan-500/15 text-cyan-300 border border-cyan-500/25">
             <Clock className="w-3.5 h-3.5" />
           </div>
         </div>
-
         <div className="mt-3 flex items-baseline gap-1.5">
-          <div className="text-3xl sm:text-4xl font-black tracking-tight text-white">
-            {nearestDays !== undefined && nearestDays !== null ? (
-              nearestDays <= 0 ? (
-                <span className="text-red-400">0.0</span>
-              ) : (
-                <span>{nearestDays.toFixed(1)}</span>
-              )
-            ) : (
-              <span className="text-emerald-400">Safe</span>
-            )}
-          </div>
-          {nearestDays !== undefined && nearestDays !== null && (
-            <span className="text-xs text-gray-400 font-mono">days</span>
-          )}
+          <span className={`text-3xl sm:text-4xl font-extrabold tracking-tight ${nearestDays !== undefined && nearestDays <= 0 ? 'text-red-400' : 'text-white'}`}>
+            {nearestDays !== undefined && nearestDays !== null ? (nearestDays <= 0 ? '0.0' : nearestDays.toFixed(1)) : 'Safe'}
+          </span>
+          <span className="text-xs text-gray-400 font-mono">days</span>
         </div>
-        <p className="mt-1.5 text-[11px] text-gray-400 font-medium">First reagent supply countdown</p>
+        <p className="mt-1 text-[11px] text-gray-400 truncate">First stockout timer</p>
       </div>
     </div>
   );
 };
 
 export default StatCards;
-
